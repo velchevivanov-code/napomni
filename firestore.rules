@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Потребителски данни — само собственикът
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Админите могат да четат всички потребители
+      allow read: if request.auth != null &&
+        request.auth.token.email in ['тук_сложи_твоя_имейл@gmail.com'];
+    }
+
+    // FCM токени — потребителят може да пише, само functions четат
+    match /fcmTokens/{tokenId} {
+      allow create, update: if request.auth != null;
+      allow delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+      allow read: if false; // Само Cloud Functions четат
+    }
+
+    // Custom deadline-и — само админи пишат, всички четат
+    match /deadlines/{deadlineId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        request.auth.token.email in ['тук_сложи_твоя_имейл@gmail.com'];
+    }
+  }
+}

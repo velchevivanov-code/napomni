@@ -1,0 +1,5 @@
+/firebase-messaging-sw.js
+  Service-Worker-Allowed: /
+
+/service-worker.js
+  Service-Worker-Allowed: /
