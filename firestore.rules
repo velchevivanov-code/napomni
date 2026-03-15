@@ -1,0 +1,25 @@
+rules_version = '2';
+// НАПомни — Firestore Security Rules
+// Rate limiting бележка: Firestore не поддържа вградено rate limiting на ниво rules.
+// За production защита срещу злоупотреба (DDoS, spam writes) използвайте:
+// 1. Firebase App Check (reCAPTCHA / Play Integrity) — блокира неавторизирани клиенти
+// 2. Cloud Functions с rate limiter (напр. express-rate-limit) за критични endpoints
+// 3. Мониторинг чрез Firebase Alerts при необичайно висок брой заявки
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Потребителски данни — само собственикът може да чете/пише
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    // FCM токени — само запис от автентикиран потребител, без четене
+    match /fcmTokens/{tokenId} {
+      allow create, update: if request.auth != null;
+      allow read: if false;
+    }
+    // Срокове — само четене от автентикирани, запис само от admin (Cloud Functions)
+    match /deadlines/{deadlineId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
