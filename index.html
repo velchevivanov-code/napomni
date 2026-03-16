@@ -692,7 +692,7 @@ function rDet(){
 async function toggleRem(id){
   if(S.rem.includes(id)){S.rem=S.rem.filter(r=>r!==id);toast('🔕 Премахнато','#d97706');}
   else{S.rem.push(id);toast('🔔 Напомнянето е добавено!');}
-  await save();rDet();
+  await save();rDet();rHome();rDl();
 }
 async function markDone(id){
   if(!S.done.includes(id)){S.done.push(id);toast('✅ Маркиран като изпълнен!');}
