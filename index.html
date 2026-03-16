@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="НАПомни">
 <title>НАПомни — Данъчни срокове 2026</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.gstatic.com https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.cloudfunctions.net https://*.firebaseapp.com wss://*.firebaseio.com">
+<!-- CSP removed: was blocking Google Auth popup (accounts.google.com not whitelisted) -->
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -363,7 +363,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 
 <script>
 // ══ FIREBASE ══
-const FBCFG={apiKey:"AIzaSyC8SJC7qUfbAD9bqIYodvChftMxug6FGow",authDomain:"taxalert-7929e.firebaseapp.com",projectId:"taxalert-7929e",storageBucket:"taxalert-7929e.firebasestorage.app",messagingSenderId:"307710022018",appId:"1:307710022018:web:09bfa425a2c1fd1295bf9b",measurementId:"G-HXM8JX7E3H"};
+const FBCFG={apiKey:"AIzaSyCZ-M2rRZCA6mwcDLV0lxNpGa8gINrnjxE",authDomain:"napomni-abae3.firebaseapp.com",projectId:"napomni-abae3",storageBucket:"napomni-abae3.firebasestorage.app",messagingSenderId:"469508428647",appId:"1:469508428647:web:5b34a7bd7b2956d6a795c2",measurementId:"G-FT3VKM1C36"};
 const ADMINS=["тук_сложи_твоя_имейл@gmail.com"];
 let db=null,auth=null,fbOK=false;
 try{firebase.initializeApp(FBCFG);db=firebase.firestore();auth=firebase.auth();fbOK=true;}catch(e){console.warn('FB:',e.message);}
