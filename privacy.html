@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Политика за поверителност — НАПомни</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#E8EDF2;color:#1A1D23;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:16px 16px 48px}
+.back{display:inline-flex;align-items:center;gap:6px;color:#6B7280;font-size:13px;font-weight:600;text-decoration:none;padding:12px 0 20px;border:none;background:none;cursor:pointer}
+.back:hover{color:#2563EB}
+.card{background:#fff;border-radius:16px;padding:24px;border:1px solid #D1D9E0;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
+h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.upd{font-size:11px;color:#9CA3AF;margin-bottom:24px}
+h2{font-size:14px;font-weight:800;color:#2563EB;margin:20px 0 10px;text-transform:uppercase;letter-spacing:.5px}
+h2:first-of-type{margin-top:0}
+p{font-size:13px;color:#4B5563;line-height:1.8;margin-bottom:10px}
+ul{font-size:13px;color:#4B5563;line-height:1.8;margin:6px 0 10px;padding-left:18px}
+li{margin-bottom:4px}
+.highlight{background:#EFF6FF;border-radius:10px;padding:12px 14px;border:1px solid #BFDBFE;margin:10px 0}
+.highlight p{color:#1E40AF;margin:0}
+.warn{background:#FEF2F2;border-radius:10px;padding:12px 14px;border:1px solid #FCA5A5;margin:10px 0}
+.warn p{color:#991B1B;margin:0}
+a{color:#2563EB}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" class="back">← Назад към НАПомни</a>
+
+  <div class="card">
+    <h1>🔒 Политика за поверителност</h1>
+    <div class="upd">Последна актуализация: 17.03.2026 г.</div>
+
+    <h2>1. Администратор на лични данни</h2>
+    <p>Наименование: [ИМЕ НА ФИРМА ИЛИ ФИЗИЧЕСКО ЛИЦЕ]<br>
+    ЕИК/ЕГН: [ПОПЪЛНИ]<br>
+    Адрес: [ПОПЪЛНИ]<br>
+    Имейл за контакт: <a href="mailto:privacy@napomni.bg">privacy@napomni.bg</a></p>
+
+    <h2>2. Какви данни събираме</h2>
+    <ul>
+      <li>Имейл адрес — за регистрация и вход</li>
+      <li>Име (при регистрация) — за персонализация</li>
+      <li>Google профил (име, имейл, снимка) — при вход с Google</li>
+      <li>Данни за фирми (наименование, ЕИК, правна форма) — въведени от потребителя</li>
+      <li>Данни за напомняния и маркирани срокове — за функционалността</li>
+      <li>FCM токен на устройството — за push нотификации (само при изричен избор)</li>
+      <li>Технически данни (IP адрес, браузър, устройство) — автоматично при ползване</li>
+    </ul>
+    <div class="highlight">
+      <p><strong>НЕ събираме:</strong> финансови данни (банкови сметки, карти) — плащанията се обработват от Stripe. Не събираме данъчни декларации, счетоводни документи, данни за здравето или биометрични данни.</p>
+    </div>
+
+    <h2>3. Защо събираме данните (правно основание по чл. 6 GDPR)</h2>
+    <ul>
+      <li><strong>Изпълнение на договор</strong> (чл. 6, ал. 1, б. „б") — за предоставяне на услугата</li>
+      <li><strong>Легитимен интерес</strong> (чл. 6, ал. 1, б. „е") — за подобряване на услугата</li>
+      <li><strong>Съгласие</strong> (чл. 6, ал. 1, б. „а") — за push нотификации</li>
+    </ul>
+
+    <h2>4. С кого споделяме данните</h2>
+    <ul>
+      <li><strong>Google Firebase (Google LLC, САЩ)</strong> — автентикация и база данни.<br>Правно основание: Стандартни договорни клаузи (SCC) по чл. 46 GDPR.<br><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a></li>
+      <li><strong>Stripe Inc. (САЩ)</strong> — обработка на плащания (само Pro план).<br><a href="https://stripe.com/privacy" target="_blank" rel="noopener">stripe.com/privacy</a></li>
+      <li><strong>Netlify Inc. (САЩ)</strong> — хостинг на приложението.<br><a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">netlify.com/privacy</a></li>
+    </ul>
+    <p>НЕ продаваме и НЕ предоставяме данни на трети лица за маркетинг.</p>
+
+    <h2>5. Срок на съхранение</h2>
+    <ul>
+      <li>Данни за акаунта — докато акаунтът е активен + 30 дни след изтриване</li>
+      <li>Технически логове — до 90 дни</li>
+      <li>Данни за плащания — съгласно данъчното законодателство (5 години)</li>
+    </ul>
+
+    <h2>6. Вашите права (по GDPR — Глава III)</h2>
+    <ul>
+      <li><strong>Достъп</strong> до данните си (чл. 15) — от Настройки → Експорт</li>
+      <li><strong>Коригиране</strong> (чл. 16) — от профила си</li>
+      <li><strong>Изтриване</strong> (чл. 17) — от Настройки → Изтрий акаунт</li>
+      <li><strong>Ограничаване</strong> на обработването (чл. 18)</li>
+      <li><strong>Преносимост</strong> (чл. 20) — чрез JSON експорт</li>
+      <li><strong>Възражение</strong> (чл. 21)</li>
+      <li><strong>Оттегляне на съгласие</strong> — по всяко време, без последици</li>
+    </ul>
+    <p>За упражняване на права: <a href="mailto:privacy@napomni.bg">privacy@napomni.bg</a> — отговаряме в срок до 30 дни.</p>
+
+    <h2>7. Жалби</h2>
+    <p>Имате право да подадете жалба до:</p>
+    <div class="highlight">
+      <p><strong>Комисия за защита на личните данни (КЗЛД)</strong><br>
+      Адрес: София 1592, бул. „Проф. Цветан Лазаров" № 2<br>
+      Имейл: <a href="mailto:kzld@cpdp.bg">kzld@cpdp.bg</a> | <a href="https://cpdp.bg" target="_blank" rel="noopener">cpdp.bg</a></p>
+    </div>
+
+    <h2>8. Бисквитки (Cookies)</h2>
+    <p>Приложението използва:</p>
+    <ul>
+      <li><strong>localStorage</strong> — за запазване на настройки (задължително, без съгласие)</li>
+      <li><strong>Firebase Auth токени</strong> — за автентикация (задължително)</li>
+    </ul>
+    <p>НЕ използваме рекламни или проследяващи бисквитки. НЕ използваме Google Analytics.</p>
+
+    <h2>9. Промени в политиката</h2>
+    <p>При промяна ще уведомим чрез приложението. Продължаването на ползване след уведомление означава приемане на промените.</p>
+
+    <h2>10. Защита на данните</h2>
+    <ul>
+      <li>HTTPS криптиране на всички комуникации</li>
+      <li>Firebase Security Rules за ограничаване на достъпа</li>
+      <li>Данните се съхраняват в ЕС (Firebase europe-west1)</li>
+      <li>Достъп до данни само от автентикирания потребител</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

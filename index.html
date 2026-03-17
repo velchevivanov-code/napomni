@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<meta name="theme-color" content="#FAFBFC">
+<meta name="theme-color" content="#E8EDF2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="НАПомни">
@@ -15,7 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 <style>
-:root{--bg:#FAFBFC;--surf:#FFFFFF;--card:#FFFFFF;--brd:#E8ECF0;--txt:#1A1D23;--sub:#6B7280;--mut:#9CA3AF;--acc:#2563EB;--acc2:#1D4ED8;--red:#DC2626;--orange:#D97706;--green:#059669;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+:root{--bg:#E8EDF2;--surf:#FFFFFF;--card:#FFFFFF;--brd:#D1D9E0;--txt:#1A1D23;--sub:#6B7280;--mut:#9CA3AF;--acc:#2563EB;--acc2:#1D4ED8;--red:#DC2626;--orange:#D97706;--green:#059669;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;scrollbar-width:none}*::-webkit-scrollbar{display:none}
 html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:var(--txt);overflow:hidden}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100%;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
@@ -88,7 +88,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 .add-banner{margin:12px 14px 0;border-radius:12px;padding:16px;border:1px dashed var(--mut);cursor:pointer;text-align:center}
 .empty{text-align:center;padding:40px 20px;color:var(--mut)}
 /* MODAL OVERLAY */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex;animation:fadeOv .2s}
 @keyframes fadeOv{from{opacity:0}to{opacity:1}}
 .sheet{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:900px;padding-bottom:calc(16px + var(--safe-bot));border:1px solid var(--brd);border-bottom:none;animation:slideUp .25s cubic-bezier(.34,1.2,.64,1);max-height:90vh;display:flex;flex-direction:column}
@@ -100,7 +100,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 .sh-body{padding:16px 20px 0;overflow-y:auto;flex:1}
 .sh-foot{padding:12px 20px 0;flex-shrink:0;display:flex;gap:8px}
 /* CONFIRM */
-.conf-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.conf-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .conf-ov.open{display:flex;animation:fadeOv .15s}
 .conf-box{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:320px;border:1px solid var(--brd);animation:fadeUp .2s}
 .conf-icon{font-size:36px;text-align:center;margin-bottom:10px}
@@ -117,9 +117,9 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 .nkid-code{color:var(--acc);font-weight:700;font-size:10px;margin-right:6px}
 .nkid-sel{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:10px;padding:9px 13px;font-size:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 /* PROFILE */
-#pmv{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:flex-end;justify-content:center}
+#pmv{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center}
 #pmv.open{display:flex}
-.p.sheet{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:900px;border:1px solid var(--brd);border-bottom:none}
+.p-sheet{background:#FFFFFF;border-radius:24px 24px 0 0;width:100%;max-width:900px;border:1px solid var(--brd);border-bottom:none;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
 .p-hdr{display:flex;align-items:center;gap:14px;padding:20px;border-bottom:1px solid var(--brd)}
 .p-av{width:52px;height:52px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;overflow:hidden;flex-shrink:0}
 .p-av img{width:100%;height:100%;object-fit:cover}
@@ -140,6 +140,22 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 /* ADMIN */
 #adm-scr{position:fixed;inset:0;background:#f5f3ff;z-index:400;display:none;flex-direction:column}
 #adm-scr.open{display:flex}
+/* HELPER */
+#helper-scr{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;flex-direction:column}
+#helper-scr.open{display:flex}
+.hlp-hdr{background:var(--surf);padding:calc(var(--safe-t)+14px) 20px 14px;border-bottom:1px solid var(--brd);flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.hlp-body{flex:1;overflow-y:auto;padding:14px}
+.hlp-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.hlp-tab{padding:7px 14px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;background:var(--surf);color:var(--mut);border:1px solid var(--brd)}
+.hlp-tab.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--brd);font-size:13px}
+.calc-row:last-child{border-bottom:none}
+.calc-lbl{color:var(--sub)}
+.calc-val{font-weight:700;color:var(--txt)}
+.calc-total{background:#eff6ff;border-radius:10px;padding:10px 14px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+.law-ref-card{background:var(--surf);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--brd);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chk-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--brd)}
+.chk-item:last-child{border-bottom:none}
 .adm-hdr{background:#F5F3FF;padding:calc(var(--safe-t)+14px) 20px 14px;border-bottom:1px solid rgba(139,92,246,.3);flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
 .adm-c{flex:1;overflow-y:auto;padding:14px}
 .adm-card{background:var(--surf);border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid var(--brd)}
@@ -207,6 +223,10 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
       <button class="btn-p" onclick="registerEmail()">Регистрирай се →</button>
     </div>
     <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--mut);cursor:pointer" onclick="guestMode()">Продължи без регистрация <span style="color:var(--acc);font-weight:700">→</span></div>
+    <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--mut);line-height:1.7">
+      С регистрацията приемате <a href="terms.html" style="color:var(--acc)">Общите условия</a>
+      и <a href="privacy.html" style="color:var(--acc)">Политиката за поверителност</a>.
+    </div>
   </div>
 </div>
 
@@ -242,6 +262,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
     </div>
     <div class="screen" id="sc-calendar"><div style="padding:14px"><div style="font-size:16px;font-weight:800;margin-bottom:12px">📆 Календар</div><div id="calc"></div></div></div>
     <div class="screen" id="sc-settings"><div style="padding:14px"><div style="font-size:16px;font-weight:800;margin-bottom:14px">⚙️ Настройки</div><div id="setc"></div></div></div>
+    <div class="screen" id="sc-n18"><div id="n18c" style="padding:14px"></div></div>
   </div>
   <nav class="nav">
     <button class="nb active" id="nv-home" onclick="goTab('home')">
@@ -255,6 +276,10 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
     <button class="nb" id="nv-company" onclick="goTab('company')">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><rect x="9" y="13" width="6" height="8" rx="1"/></svg>
       <span class="nb-lbl">Фирми</span><div class="nb-dot"></div>
+    </button>
+    <button class="nb" id="nv-n18" onclick="goTab('n18')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="nb-lbl">Н-18</span><div class="nb-dot"></div>
     </button>
     <button class="nb" id="nv-settings" onclick="goTab('settings')">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -276,8 +301,13 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
       </div>
       <button onclick="closeP()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px">✕</button>
     </div>
+    <div id="pro-upgrade-banner" style="display:none;margin:0 16px 4px;padding:10px 14px;background:#eff6ff;border:1px solid var(--acc);border-radius:12px;cursor:pointer" onclick="closeP();showProWall('НАПомни Pro')">
+      <div style="font-size:12px;font-weight:700;color:var(--acc)">⭐ Надгради до Pro — 9.99 лв/мес</div>
+      <div style="font-size:10px;color:var(--sub);margin-top:2px">Неограничени срокове, ЗБУТ, AI помощник и още</div>
+    </div>
     <div id="pmenu">
       <div class="p-item" id="pmi-adm" style="display:none" onclick="openAdm()"><span style="font-size:18px;width:28px;text-align:center">⚙️</span><div><div style="font-size:13px;font-weight:600">Администраторски панел</div><div style="font-size:10px;color:var(--mut)">Потребители, срокове, статистика</div></div><div style="color:var(--mut);margin-left:auto">›</div></div>
+      <div class="p-item" onclick="closeP();openHelper()"><span style="font-size:18px;width:28px;text-align:center">🧮</span><div><div style="font-size:13px;font-weight:600">Счетоводен помощник</div><div style="font-size:10px;color:var(--mut)">Калкулатори и справочници</div></div><div style="color:var(--mut);margin-left:auto">›</div></div>
       <div class="p-item" onclick="closeP();goTab('company')"><span style="font-size:18px;width:28px;text-align:center">🏢</span><div><div style="font-size:13px;font-weight:600">Моите фирми</div><div style="font-size:10px;color:var(--mut)">Добавяне и управление</div></div><div style="color:var(--mut);margin-left:auto">›</div></div>
       <div class="p-item" onclick="closeP();goTab('settings')"><span style="font-size:18px;width:28px;text-align:center">⚙️</span><div><div style="font-size:13px;font-weight:600">Настройки</div><div style="font-size:10px;color:var(--mut)">Известия, тема, акаунт</div></div><div style="color:var(--mut);margin-left:auto">›</div></div>
       <div class="p-item" onclick="closeP();exportData()"><span style="font-size:18px;width:28px;text-align:center">📤</span><div><div style="font-size:13px;font-weight:600">Експорт на данни</div><div style="font-size:10px;color:var(--mut)">JSON файл</div></div><div style="color:var(--mut);margin-left:auto">›</div></div>
@@ -312,6 +342,26 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
       <button class="btn-o" onclick="closeConf()" style="flex:1">Отказ</button>
       <button class="btn-d" id="conf-ok" style="flex:1">Потвърди</button>
     </div>
+  </div>
+</div>
+
+<!-- СЧЕТОВОДЕН ПОМОЩНИК -->
+<div id="helper-scr">
+  <div class="hlp-hdr">
+    <div>
+      <div style="font-size:18px;font-weight:800">🧮 Счетоводен помощник</div>
+      <div style="font-size:10px;color:var(--mut);margin-top:2px">Калкулатори и справочници</div>
+    </div>
+    <button onclick="closeHelper()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px">✕</button>
+  </div>
+  <div class="hlp-body">
+    <div class="hlp-tabs">
+      <button class="hlp-tab active" id="htab-sol" onclick="setHTab('sol')">💼 Осигуровки СОЛ</button>
+      <button class="hlp-tab" id="htab-salary" onclick="setHTab('salary')">👤 Заплата</button>
+      <button class="hlp-tab" id="htab-laws" onclick="setHTab('laws')">📚 Закони</button>
+      <button class="hlp-tab" id="htab-checklist" onclick="setHTab('checklist')">✅ Чеклист</button>
+    </div>
+    <div id="hlp-content"></div>
   </div>
 </div>
 
@@ -448,11 +498,21 @@ const fmtS=d=>{const x=new Date(d);return`${x.getDate()} ${MS[x.getMonth()]}`;};
 let CU=null,isGuest=false,isAdmin=false,extraDl=[];
 let S={
   tab:'home',prevTab:'home',sel:null,full:false,ag:'Всички',
+  plan: localStorage.getItem('napomni_plan')||'free',
   cos:JSON.parse(localStorage.getItem('napomni_cos')||'[]'),
   rem:JSON.parse(localStorage.getItem('napomni_rem')||'[]'),
   done:JSON.parse(localStorage.getItem('napomni_done')||'[]'),
   settings:JSON.parse(localStorage.getItem('napomni_set')||'{"notif":true,"sound":false,"showDone":false}'),
 };
+// ══ PLAN HELPERS ══
+function isPro(){return S.plan==='pro';}
+function canAddCompany(){return isPro()||S.cos.length<1;}
+function getVisibleDeadlines(){
+  let list=getFil();
+  if(!isPro()) list=list.slice(0,10);
+  return list;
+}
+
 // Sanitize user input to prevent XSS
 function san(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 // Session timeout — auto logout after 24h
@@ -468,6 +528,7 @@ function getFil(){
   return allDl().filter(d=>{
     // Hide done deadlines unless showDone setting is on
     if(!S.settings.showDone && S.done.includes(d.id))return false;
+    if(!isPro() && d.group==='ЗБУТ')return false;
     if(!ac)return true;
     if(d.vat && !ac.vat)return false;
     if(d.sol && !ac.sol && !['ET','SOL'].includes(ac.lf))return false;
@@ -488,6 +549,7 @@ async function save(){
   localStorage.setItem('napomni_cos',JSON.stringify(S.cos));
   localStorage.setItem('napomni_rem',JSON.stringify(S.rem));
   localStorage.setItem('napomni_done',JSON.stringify(S.done));
+  localStorage.setItem('napomni_plan',S.plan);
   if(fbOK&&CU&&!isGuest){
     try{await db.collection('users').doc(CU.uid).set({cos:S.cos,rem:S.rem,done:S.done,upd:new Date()},{merge:true});}catch(e){}
   }
@@ -497,7 +559,7 @@ async function loadUD(){
   if(fbOK&&CU&&!isGuest){
     try{
       const doc=await db.collection('users').doc(CU.uid).get();
-      if(doc.exists){const d=doc.data();if(d.cos)S.cos=d.cos;if(d.rem)S.rem=d.rem;if(d.done)S.done=d.done;}
+      if(doc.exists){const d=doc.data();if(d.cos)S.cos=d.cos;if(d.rem)S.rem=d.rem;if(d.done)S.done=d.done;if(d.plan)S.plan=d.plan;}
       const snap=await db.collection('deadlines').get();
       extraDl=snap.docs.map(d=>({id:d.id,...d.data()}));
     }catch(e){}
@@ -536,6 +598,7 @@ function goTab(tab){
   if(tab==='company')rCo();
   if(tab==='calendar')rCal();
   if(tab==='settings')rSet();
+  if(tab==='n18')rN18();
 }
 function openDet(id){
   S.prevTab=S.tab;S.sel=allDl().find(d=>d.id===id);S.full=false;
@@ -561,12 +624,23 @@ function dbx(ds,color){
 }
 function drow(d){
   const n=dTo(d.date);
-  return`<div class="dl-row" onclick="openDet('${d.id}')">${dbx(d.date,d.color||'#38bdf8')}<div style="flex:1;min-width:0"><div class="dl-title">${d.title}</div><div class="dl-sub">${d.sub||''}</div></div>${bdg(n)}<svg width="14" height="14" fill="none" stroke="#1e2d45" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>`;
+  const isDone=S.done.includes(d.id);
+  const rowStyle=isDone?'background:#f0fdf4;':'';
+  const textStyle=isDone?'text-decoration:line-through;opacity:0.6;':'';
+  return`<div class="dl-row" style="${rowStyle}" onclick="openDet('${d.id}')">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="event.stopPropagation()">
+      <input type="checkbox" ${isDone?'checked':''} onchange="toggleDone('${d.id}')" style="width:20px;height:20px;accent-color:#059669;cursor:pointer;flex-shrink:0">
+      ${isDone?'<span style="color:#059669;font-weight:700;font-size:11px">ИЗПЪЛНЕНО</span>':''}
+    </label>
+    ${dbx(d.date,d.color||'#38bdf8')}
+    <div style="flex:1;min-width:0;${textStyle}"><div class="dl-title">${d.title}</div><div class="dl-sub">${d.sub||''}</div></div>
+    ${bdg(n)}<svg width="14" height="14" fill="none" stroke="#1e2d45" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+  </div>`;
 }
 
 // ══ HOME ══
 function rHome(){
-  const ac=getAc(),list=getFil();
+  const ac=getAc(),list=getVisibleDeadlines();
   const urgent=list.filter(d=>{const n=dTo(d.date);return n>=0&&n<=7;});
   const soon=list.filter(d=>{const n=dTo(d.date);return n>7&&n<=30;});
   const over=list.filter(d=>dTo(d.date)<0&&dTo(d.date)>=-60);
@@ -626,7 +700,15 @@ function rHome(){
   // Предстоящи
   h+=`<div class="a-box normal"><div class="a-title" style="color:var(--acc)">📅 ПРЕДСТОЯЩИ — 30 ДНИ</div>${soon.length?soon.map(drow).join(''):'<div style="padding:12px 14px;color:var(--mut);font-size:13px">Няма срокове за следващите 30 дни</div>'}</div>`;
   h+='<div style="height:8px"></div>';
-  h+=`<div style="padding:16px;text-align:center;font-size:11px;color:var(--mut)">Последна актуализация: ДВ бр. 22 / 24.02.2026 г.<br>Данните са информационни. Консултирайте се с данъчен консултант.</div>`;
+  // DV footer
+  if(isPro()&&lastDVData){
+    h+=`<div style="margin:0 14px 8px;background:var(--surf);border-radius:12px;padding:12px 14px;border:1px solid var(--brd)">
+      <div style="font-size:10px;font-weight:800;color:var(--acc);letter-spacing:.5px;margin-bottom:4px">📰 ПОСЛЕДНА АКТУАЛИЗАЦИЯ ПО ДВ</div>
+      <div style="font-size:12px;font-weight:700;color:var(--txt)">ДВ бр. ${san(lastDVData.dvBroi)} / ${san(lastDVData.dvDate)}</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:2px">${san(lastDVData.summary||'')}</div>
+    </div>`;
+  }
+  h+=`<div style="padding:12px 16px 16px;text-align:center;font-size:10px;color:var(--mut);line-height:1.7">${lastDVData?`Актуализирано по ДВ бр. ${san(lastDVData.dvBroi)} / ${san(lastDVData.dvDate)} г.`:'Данните са актуални за 2026 г.'}<br>Данните са с информационен характер — консултирайте се с данъчен консултант.</div>`;
   document.getElementById('hc').innerHTML=h;
 }
 
@@ -635,10 +717,11 @@ const GROUPS=["Всички",...new Set(BDB.map(d=>d.group))];
 function rDl(){
   document.getElementById('gchips').innerHTML=GROUPS.map(g=>`<button class="chip${g===S.ag?' active':''}" style="${g===S.ag&&GC[g]?'background:'+GC[g]:''}" onclick="setGrp('${g}')">${g}</button>`).join('');
   const q=(document.getElementById('si')||{value:''}).value.toLowerCase();
-  const list=getFil().filter(d=>(S.ag==='Всички'||d.group===S.ag)&&(!q||d.title.toLowerCase().includes(q)||d.sub?.toLowerCase().includes(q)||(d.law||'').toLowerCase().includes(q)||(d.tags||[]).some(t=>t.toLowerCase().includes(q))));
+  const list=getVisibleDeadlines().filter(d=>(S.ag==='Всички'||d.group===S.ag)&&(!q||d.title.toLowerCase().includes(q)||d.sub?.toLowerCase().includes(q)||(d.law||'').toLowerCase().includes(q)||(d.tags||[]).some(t=>t.toLowerCase().includes(q))));
   const el=document.getElementById('dll');
   if(!list.length){el.innerHTML='<div class="empty"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-size:13px">Няма намерени срокове</div></div>';return;}
   let h='<div style="padding:0 14px 8px">';
+  if(!isPro()){h+=`<div onclick="showProWall('Всички срокове и ЗБУТ')" style="margin-bottom:8px;background:#eff6ff;border:1px dashed var(--acc);border-radius:12px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px"><div style="font-size:18px">⭐</div><div><div style="font-size:12px;font-weight:700;color:var(--acc)">НАПомни Pro — неограничени срокове и ЗБУТ</div><div style="font-size:10px;color:var(--sub)">Безплатен план: до 10 срока, без ЗБУТ. Натисни за повече.</div></div></div>`;}
   list.forEach(d=>{
     const n=dTo(d.date);
     const totalDays=30;
@@ -646,14 +729,21 @@ function rDl(){
     const progColor=n<=0?'var(--red)':n<=7?'var(--red)':n<=21?'var(--orange)':'var(--green)';
     const cntText=n<0?'Изтекъл':n===0?'Днес!':n+'д';
     const cntColor=n<=0?'var(--red)':n<=7?'var(--red)':n<=21?'var(--orange)':'var(--sub)';
+    const isDoneCard=S.done.includes(d.id);
+    const cardBg=isDoneCard?'background:#f0fdf4;':'';
+    const cardTextStyle=isDoneCard?'text-decoration:line-through;opacity:0.6;':'';
     h+=`<div class="dl-card-wrap" id="wrap-${d.id}">
   <div class="swipe-action" id="sw-${d.id}">✓ Готово</div>
-  <div class="dl-card" onclick="openDet('${d.id}')" id="card-${d.id}" style="border-left:3px solid ${d.color||'var(--acc)'}">
+  <div class="dl-card" onclick="openDet('${d.id}')" id="card-${d.id}" style="border-left:3px solid ${d.color||'var(--acc)'};${cardBg}">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-      <div style="flex:1;padding-right:10px">
-        <div style="font-size:14px;font-weight:700;color:var(--txt)">${d.title}</div>
-        <div style="font-size:11px;color:var(--mut);margin-top:2px">${fmtS(d.date)} · ${d.sub||''}</div>
-      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;padding-right:10px" onclick="event.stopPropagation()">
+        <input type="checkbox" ${isDoneCard?'checked':''} onchange="toggleDone('${d.id}')" style="width:18px;height:18px;accent-color:#059669;cursor:pointer;flex-shrink:0">
+        <div style="${cardTextStyle}">
+          <div style="font-size:14px;font-weight:700;color:var(--txt)">${d.title}</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px">${fmtS(d.date)} · ${d.sub||''}</div>
+          ${isDoneCard?'<span style="color:#059669;font-weight:700;font-size:11px">ИЗПЪЛНЕНО</span>':''}
+        </div>
+      </label>
       <span style="font-size:13px;font-weight:800;color:${cntColor};white-space:nowrap;flex-shrink:0">${cntText}</span>
     </div>
     <div style="height:4px;background:var(--brd);border-radius:2px;overflow:hidden">
@@ -700,6 +790,11 @@ async function markDone(id){
 async function unmarkDone(id){
   S.done=S.done.filter(r=>r!==id);toast('↩️ Върнат','#d97706');
   await save();rDet();rHome();rDl();
+}
+async function toggleDone(id){
+  if(S.done.includes(id)){S.done=S.done.filter(r=>r!==id);toast('↩️ Върнат','#d97706');}
+  else{S.done.push(id);toast('✅ Маркиран като изпълнен!');}
+  await save();rHome();rDl();rDet();
 }
 
 // ══ COMPANIES ══
@@ -752,6 +847,7 @@ function askDeleteCo(id){
 // ══ COMPANY SHEET (ADD / EDIT) ══
 let coEditId=null;
 function openCoSheet(editId=null){
+  if(!editId && !canAddCompany()){showProWall('Неограничен брой фирми');return;}
   coEditId=editId;
   const co=editId?S.cos.find(c=>c.id===editId):null;
   document.getElementById('co-sh-title').textContent=co?'Редактиране на фирма':'Нова фирма';
@@ -919,6 +1015,13 @@ function rSet(){
       <button class="btn-o" style="margin-bottom:8px" onclick="exportData()">📤 Експорт на данни (JSON)</button>
       <button class="btn-d" onclick="confirmClearData()">🗑 Изчисти всички данни</button>
     </div>
+    <div style="background:var(--surf);border-radius:16px;padding:0 16px;border:1px solid var(--brd);margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:var(--mut);letter-spacing:.7px;text-transform:uppercase;padding-top:13px;margin-bottom:4px">ПРАВНИ ДОКУМЕНТИ</div>
+      <a href="privacy.html" style="display:block;padding:12px 0;border-bottom:1px solid var(--brd);color:var(--txt);text-decoration:none;font-size:13px;font-weight:600">🔒 Политика за поверителност</a>
+      <a href="terms.html" style="display:block;padding:12px 0;border-bottom:1px solid var(--brd);color:var(--txt);text-decoration:none;font-size:13px;font-weight:600">📄 Общи условия</a>
+      <a href="cookies.html" style="display:block;padding:12px 0;border-bottom:1px solid var(--brd);color:var(--txt);text-decoration:none;font-size:13px;font-weight:600">🍪 Политика за бисквитки</a>
+      <a href="delete-account.html" style="display:block;padding:12px 0;color:var(--txt);text-decoration:none;font-size:13px;font-weight:600">🗑 Изтриване на акаунт</a>
+    </div>
     <div style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--acc);margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
       <div style="font-size:11px;font-weight:800;color:var(--acc);letter-spacing:.7px;text-transform:uppercase;margin-bottom:10px">НАПомни Pro</div>
       <div style="font-size:22px;font-weight:900;color:var(--txt);margin-bottom:4px">9.99 лв/мес</div>
@@ -955,6 +1058,241 @@ function confirmClearData(){
   });
 }
 
+// ══ СЧЕТОВОДЕН ПОМОЩНИК ══
+let hTab='sol';
+let hlpChecklist=JSON.parse(localStorage.getItem('napomni_chk')||'[]');
+
+function openHelper(){
+  if(!isPro()){showProWall('Счетоводен помощник');return;}
+  document.getElementById('helper-scr').classList.add('open');
+  setHTab('sol');
+}
+function closeHelper(){document.getElementById('helper-scr').classList.remove('open');}
+
+function setHTab(tab){
+  hTab=tab;
+  document.querySelectorAll('.hlp-tab').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('htab-'+tab);
+  if(el)el.classList.add('active');
+  renderHelper();
+}
+
+function renderHelper(){
+  const c=document.getElementById('hlp-content');
+  if(hTab==='sol') c.innerHTML=renderSolCalc();
+  else if(hTab==='salary') c.innerHTML=renderSalaryCalc();
+  else if(hTab==='laws') c.innerHTML=renderLawsRef();
+  else if(hTab==='checklist') c.innerHTML=renderChecklist();
+}
+
+function renderSolCalc(){
+  const min=477,max=1917;
+  const val=parseInt(localStorage.getItem('napomni_sol_inc')||'710');
+  const doo=+(val*0.198).toFixed(2);
+  const nzok=+(val*0.08).toFixed(2);
+  const dzpo=+(val*0.05).toFixed(2);
+  const total=+(doo+nzok+dzpo).toFixed(2);
+  const yearly=+(total*12).toFixed(2);
+  return`<div style="background:var(--surf);border-radius:14px;padding:16px;border:1px solid var(--brd);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+    <div style="font-size:14px;font-weight:800;margin-bottom:14px">💼 Осигуровки на СОЛ</div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--sub)">Осигурителен доход</span>
+        <span style="font-size:14px;font-weight:800;color:var(--acc)">${val} €/мес</span>
+      </div>
+      <input type="range" min="${min}" max="${max}" step="1" value="${val}"
+        oninput="localStorage.setItem('napomni_sol_inc',this.value);renderHelper()"
+        style="width:100%;accent-color:var(--acc);cursor:pointer">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-top:4px">
+        <span>${min} € (мин.)</span><span>${max} € (макс.)</span>
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px 14px">
+      <div class="calc-row"><span class="calc-lbl">ДОО — Пенсии (19.8%)</span><span class="calc-val">${doo} €</span></div>
+      <div class="calc-row"><span class="calc-lbl">НЗОК — Здравно (8%)</span><span class="calc-val">${nzok} €</span></div>
+      <div class="calc-row"><span class="calc-lbl">ДЗПО-УПФ (5%)</span><span class="calc-val">${dzpo} €</span></div>
+    </div>
+    <div class="calc-total"><span style="font-size:13px;font-weight:700">Общо месечно</span><span style="font-size:18px;font-weight:900;color:var(--acc)">${total} €</span></div>
+    <div style="margin-top:8px;background:#f0fdf4;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--green);font-weight:600">Общо годишно</span>
+      <span style="font-size:15px;font-weight:900;color:var(--green)">${yearly} €</span>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--mut);line-height:1.6">Вноските се внасят до 25-то число на следващия месец. Ставки 2026.</div>
+  </div>`;
+}
+
+function renderSalaryCalc(){
+  const gross=parseFloat(localStorage.getItem('napomni_gross')||'1500');
+  const empRate=0.1578; // ДОО 10.58 + НЗОК 3.2 + ДЗПО 2% + безработица 0.4% + ТЗПБ - обобщено
+  const emplRate=0.2152; // работодател: ДОО 13.22 + НЗОК 4.8 + ДЗПО 3% + ТЗПБ 0.5% + безработица 0.6%
+  const empContr=+(gross*empRate).toFixed(2);
+  const emplContr=+(gross*emplRate).toFixed(2);
+  const taxBase=+(gross-empContr).toFixed(2);
+  const tax=+(taxBase*0.10).toFixed(2);
+  const net=+(gross-empContr-tax).toFixed(2);
+  const totalCost=+(gross+emplContr).toFixed(2);
+  return`<div style="background:var(--surf);border-radius:14px;padding:16px;border:1px solid var(--brd);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+    <div style="font-size:14px;font-weight:800;margin-bottom:14px">👤 Заплата на служител</div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--sub)">Брутна заплата</span>
+        <span style="font-size:14px;font-weight:800;color:var(--acc)">${gross} €</span>
+      </div>
+      <input type="range" min="477" max="5000" step="10" value="${gross}"
+        oninput="localStorage.setItem('napomni_gross',this.value);renderHelper()"
+        style="width:100%;accent-color:var(--acc);cursor:pointer">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-top:4px">
+        <span>477 € (мин. РЗ)</span><span>5 000 €</span>
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:800;color:var(--mut);margin-bottom:8px;letter-spacing:.5px">УДРЪЖКИ ОТ СЛУЖИТЕЛЯ</div>
+      <div class="calc-row"><span class="calc-lbl">Осигуровки (15.78%)</span><span class="calc-val" style="color:var(--red)">-${empContr} €</span></div>
+      <div class="calc-row"><span class="calc-lbl">ДДФЛ 10%</span><span class="calc-val" style="color:var(--red)">-${tax} €</span></div>
+    </div>
+    <div class="calc-total" style="margin-bottom:8px"><span style="font-size:13px;font-weight:700">Нето (чисто) за служителя</span><span style="font-size:18px;font-weight:900;color:var(--green)">${net} €</span></div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:800;color:var(--mut);margin-bottom:8px;letter-spacing:.5px">РАЗХОДИ НА РАБОТОДАТЕЛЯ</div>
+      <div class="calc-row"><span class="calc-lbl">Брутна заплата</span><span class="calc-val">${gross} €</span></div>
+      <div class="calc-row"><span class="calc-lbl">Осигуровки работодател (21.52%)</span><span class="calc-val" style="color:var(--red)">+${emplContr} €</span></div>
+    </div>
+    <div class="calc-total" style="background:#fff7ed"><span style="font-size:13px;font-weight:700;color:var(--orange)">Общ разход за работодателя</span><span style="font-size:18px;font-weight:900;color:var(--orange)">${totalCost} €</span></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--mut);line-height:1.6">Приблизителни ставки 2026. Конкретните осигурителни ставки зависят от вида труд и ТЗПБ категория.</div>
+  </div>`;
+}
+
+function renderLawsRef(){
+  const laws=[
+    {name:"ЗКПО",color:"#8338ec",items:["Корпоративен данък: 10%","Авансови вноски: месечни (над 3 млн. лв. оборот) или тримесечни","ГДД по чл.92: до 31 март следващата година","Нов образец за 2025 г. — ДВ бр. 22/2026"]},
+    {name:"ЗДДФЛ",color:"#3a86ff",items:["Физически лица: 10% върху облагаемия доход","Едноличен търговец: 15%","Авансов данък: до 15-то на следващия месец","ГДД: до 30 април (с 5% отстъпка при подаване до 31 март)"]},
+    {name:"ЗДДС",color:"#e63946",items:["Нов праг за регистрация: 51 130 евро","Стандартна ставка: 20%","Намалена ставка (хотели, ресторанти): 9%","Месечна справка-декларация: до 14-то число","VIES декларация: до 14-то за ВОД/ВОП"]},
+    {name:"КСО",color:"#f4a261",items:["Мин. осигурителен доход СОЛ: 477 €/мес","Макс. осигурителен доход: 1917 €/мес","ДОО: 19.8% (13.22% работодател + 6.58% служител при трудов договор)","НЗОК: 8% (4.8% + 3.2%)","ДЗПО-УПФ: 5% (3% + 2%)"]},
+    {name:"ЗСч",color:"#06d6a0",items:["Микро предприятие: до 3 млн. лв. нетни приходи, до 10 служители","Малко: до 16 млн. лв., до 50 служители","ГФО в Търговски регистър: до 30 юни","Публикуват само средни и големи предприятия пълен ГФО"]},
+  ];
+  return laws.map(l=>`<div class="law-ref-card">
+    <div style="display:inline-block;background:${l.color}22;color:${l.color};border:1px solid ${l.color}44;border-radius:8px;padding:3px 12px;font-size:11px;font-weight:800;margin-bottom:10px">${l.name}</div>
+    ${l.items.map(i=>`<div style="display:flex;gap:8px;font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:4px"><span style="color:${l.color};flex-shrink:0">•</span><span>${i}</span></div>`).join('')}
+  </div>`).join('');
+}
+
+const CHECKLIST_ITEMS=[
+  "Инвентаризация на дълготрайни активи",
+  "Равняване на банкови извлечения",
+  "Проверка на вземания и задължения",
+  "Начисляване на амортизации",
+  "Провизии за неизползвани отпуски",
+  "Данъчен амортизационен план (ДАП)",
+  "Преоценка на материални запаси",
+  "Изготвяне на ГФО (баланс, ОПР)",
+  "Подаване на ГДД по чл.92 ЗКПО",
+  "Публикуване в Търговски регистър",
+];
+
+function renderChecklist(){
+  const done=hlpChecklist;
+  const allDone=done.length===CHECKLIST_ITEMS.length;
+  let h=`<div style="background:var(--surf);border-radius:14px;padding:16px;border:1px solid var(--brd);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:800">📋 Приключване на годината</div>
+      <button onclick="hlpChecklist=[];localStorage.setItem('napomni_chk','[]');renderHelper()" style="background:none;border:none;font-size:11px;color:var(--mut);cursor:pointer;padding:4px 8px">Нулирай</button>
+    </div>
+    <div style="height:6px;background:var(--brd);border-radius:3px;overflow:hidden;margin-bottom:14px">
+      <div style="height:100%;width:${Math.round(done.length/CHECKLIST_ITEMS.length*100)}%;background:var(--green);border-radius:3px;transition:width .3s"></div>
+    </div>
+    <div style="font-size:11px;color:var(--mut);margin-bottom:12px">${done.length} / ${CHECKLIST_ITEMS.length} изпълнени</div>`;
+  CHECKLIST_ITEMS.forEach((item,i)=>{
+    const checked=done.includes(i);
+    h+=`<div class="chk-item">
+      <input type="checkbox" ${checked?'checked':''} onchange="toggleHlpChk(${i})"
+        style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:1px">
+      <span style="font-size:13px;color:var(--txt);${checked?'text-decoration:line-through;opacity:0.5;':''}">${item}</span>
+    </div>`;
+  });
+  if(allDone)h+=`<div style="margin-top:12px;background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;font-size:13px;font-weight:700;color:var(--green)">🎉 Всичко е готово!</div>`;
+  h+=`</div>`;
+  return h;
+}
+
+function toggleHlpChk(i){
+  if(hlpChecklist.includes(i))hlpChecklist=hlpChecklist.filter(x=>x!==i);
+  else hlpChecklist.push(i);
+  localStorage.setItem('napomni_chk',JSON.stringify(hlpChecklist));
+  renderHelper();
+}
+
+// ══ НАРЕДБА Н-18 ══
+const N18_GUIDE=[
+  {title:"Кога е задължителен касов апарат?",content:"Всяко лице, извършващо продажби на стоки/услуги, за които плащането не е по банков път, е длъжно да регистрира и отчита продажбите си чрез ФУ (фискално устройство).\n\nИзключения (чл. 4 от Наредба Н-18):\n• Продажби на вестници и списания\n• Дребни услуги до определен праг\n• Продажби в обектите на БНБ\n• Застрахователни услуги\n• Банкови операции",penalty:"Глоба 500–2000 лв. за първо нарушение. При повторно: 2000–5000 лв. Запечатване на търговския обект за 30 дни.",law:"чл. 118 ЗДДС; Наредба Н-18/2006"},
+  {title:"Какво е СУПТО и трябва ли ми?",content:"СУПТО = Софтуер за Управление на Продажбите в Търговски Обект.\n\nАко използвате КАКЪВТО И ДА Е софтуер (включително Excel с макроси) за управление на продажбите — той се счита за СУПТО.\n\nВсеки СУПТО трябва да:\n• Е включен в публичния списък на НАП\n• Има дистанционна връзка с НАП\n• Генерира уникален номер на продажба\n• Не позволява изтриване или промяна на записи",penalty:"Глоба 3000–10 000 лв. Запечатване на обекта.",law:"чл. 118, ал. 14 ЗДДС"},
+  {title:"Електронен магазин — изисквания",content:"Лицата, извършващи продажби чрез е-магазин, са ДЛЪЖНИ да:\n\n1. Подадат информация в НАП за е-магазина (Приложение 33)\n2. Регистрират продажбите с ФУ или ИАСУТД\n3. Съхраняват информация за всяка поръчка\n4. Подават месечен отчет (Приложение 38 — до 15-то число)\n\n⚠️ От 2026 г.: Касовите бележки може да се издават в евро. Проверете готовността на вашето ФУ.",penalty:"Глоба 500–5000 лв. + запечатване на обекта.",law:"чл. 52о, Наредба Н-18"},
+  {title:"Сторно операции — как правилно?",content:"Сторно бележка се издава при:\n• Рекламация от клиент\n• Връщане на стока\n• Грешно маркиране\n\nИздава се чрез ФУ с причина и номер на оригиналната бележка.\n\nЗАБРАНЕНО е:\n• Ръчно написани сторно бележки\n• Сторно без причина\n• Сторно на стара дата без оригинален бон",penalty:"Глоба 500–2000 лв.",law:"чл. 31 от Наредба Н-18"},
+  {title:"Дневен финансов отчет (Z-отчет)",content:"В КРАЯ на всеки работен ден, в който е имало продажби, търговецът е ДЛЪЖЕН да отпечата дневен финансов отчет (Z-отчет).\n\nОтчетът:\n• Нулира дневните натрупвания\n• Записва се във фискалната памет\n• Не може да се повтаря или коригира\n\nЗадължително се съхранява контролната лента (КЛЕН) на ФУ за 5 години.",penalty:"Глоба 200–1000 лв. за всеки пропуснат ден.",law:"чл. 39 от Наредба Н-18"},
+  {title:"Евро и фискални устройства (2026)",content:"От 01.01.2026 г. — след въвеждане на еврото:\n\n• Всички ФУ трябва да поддържат операции в евро\n• СУПТО трябва да работи с евро\n• Касови бележки се издават в евро\n• Необходима е актуализация на софтуера на ФУ\n\nСвържете се с доставчика на вашето ФУ за актуализация.\n\n(Проект за промени в Наредба Н-18, ДВ 2025)",penalty:"Глоба 500–5000 лв. при несъответстващо ФУ.",law:"Наредба Н-18, проект за ИД 2025"}
+];
+
+let n18Open=null;
+function rN18(){
+  if(!isPro()){
+    document.getElementById('n18c').innerHTML=`
+      <div style="text-align:center;padding:48px 20px">
+        <div style="font-size:48px;margin-bottom:16px">📋</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:8px">Наредба Н-18 Справочник</div>
+        <div style="font-size:13px;color:var(--sub);margin-bottom:24px;line-height:1.7">
+          Пълен справочник за касови апарати, СУПТО,<br>сторно операции, Z-отчети и евро готовност.<br>Достъпно само с Pro план.
+        </div>
+        <button class="btn-p" onclick="showProWall('Наредба Н-18 Справочник')" style="max-width:280px;margin:0 auto;display:block">⭐ Виж с Pro план</button>
+      </div>`;
+    return;
+  }
+  let h=`<div style="font-size:16px;font-weight:800;margin-bottom:4px">📋 Наредба Н-18</div>
+  <div style="font-size:11px;color:var(--mut);margin-bottom:14px">Справочник за фискални устройства и СУПТО</div>`;
+  N18_GUIDE.forEach((item,i)=>{
+    const isOpen=n18Open===i;
+    h+=`<div style="background:var(--surf);border-radius:12px;margin-bottom:8px;border:1px solid ${isOpen?'var(--acc)':'var(--brd)'};overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+      <div onclick="n18Open=${isOpen?'null':i};rN18()" style="display:flex;align-items:center;justify-content:space-between;padding:14px;cursor:pointer;gap:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--txt);flex:1">${item.title}</div>
+        <svg width="16" height="16" fill="none" stroke="var(--mut)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;transform:${isOpen?'rotate(180deg)':'rotate(0)'};transition:transform .2s"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      ${isOpen?`<div style="padding:0 14px 14px;border-top:1px solid var(--brd)">
+        <div style="font-size:12px;color:var(--sub);line-height:1.8;white-space:pre-line;padding-top:12px">${san(item.content)}</div>
+        ${item.penalty?`<div style="margin-top:12px;background:#fef2f2;border-radius:8px;padding:10px 12px;border:1px solid #fca5a5">
+          <div style="font-size:10px;font-weight:800;color:var(--red);margin-bottom:4px">⚠️ ГЛОБИ И ПОСЛЕДСТВИЯ</div>
+          <div style="font-size:12px;color:var(--red);line-height:1.6">${san(item.penalty)}</div>
+        </div>`:''}
+        ${item.law?`<div style="margin-top:10px;background:#eff6ff;border-radius:8px;padding:8px 12px;border:1px solid #bfdbfe">
+          <div style="font-size:10px;font-weight:800;color:var(--acc);margin-bottom:2px">📖 ПРАВНО ОСНОВАНИЕ</div>
+          <div style="font-size:12px;color:var(--acc);font-weight:600">${san(item.law)}</div>
+        </div>`:''}
+      </div>`:''}
+    </div>`;
+  });
+  // DV changes section
+  if(lastDVData&&lastDVData.changes&&lastDVData.changes.length){
+    h+=`<div style="margin-top:12px;background:#eff6ff;border-radius:12px;padding:14px;border:1px solid #bfdbfe">
+      <div style="font-size:11px;font-weight:800;color:var(--acc);margin-bottom:8px">📰 ПОСЛЕДНИ ПРОМЕНИ — ДВ бр. ${san(lastDVData.dvBroi)}/${san(lastDVData.dvDate)}</div>
+      ${lastDVData.changes.map(ch=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start">
+        <span style="font-size:10px;font-weight:800;color:var(--acc);background:#dbeafe;border-radius:5px;padding:2px 6px;flex-shrink:0">${san(ch.law||'')}</span>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--txt)">${san(ch.desc||'')}</div>
+          ${ch.dvUrl&&ch.dvUrl!=='#'?`<div onclick="openLaw('${ch.dvUrl}','ДВ — ${san(ch.law||'')}'); " style="font-size:10px;color:var(--acc);cursor:pointer;margin-top:2px">Отвори в ДВ →</div>`:''}
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+  h+=`<div style="margin-top:8px;padding:12px;background:var(--surf);border-radius:12px;border:1px solid var(--brd);text-align:center">
+    <div style="font-size:10px;color:var(--mut);line-height:1.7">Информацията е с информационен характер.<br>Консултирайте се с данъчен консултант за конкретен случай.</div>
+  </div>`;
+  document.getElementById('n18c').innerHTML=h;
+}
+
+// ══ PRO WALL ══
+function showProWall(feature){
+  document.getElementById('pro-wall-feat').textContent=(feature||'Тази функция')+' е достъпна с Pro план.';
+  document.getElementById('pro-wall-ov').classList.add('open');
+}
+function closeProWall(){document.getElementById('pro-wall-ov').classList.remove('open');}
+function upgradePro(){toast('⭐ Скоро! Stripe интеграция идва.');closeProWall();}
+
 // ══ PROFILE ══
 function openP(){document.getElementById('pmv').classList.add('open');}
 function closeP(){document.getElementById('pmv').classList.remove('open');}
@@ -965,7 +1303,12 @@ function updatePUI(){
   const init=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)||'?';
   document.getElementById('pname').textContent=name;
   document.getElementById('pemail').textContent=email;
-  document.getElementById('pplan').textContent=isAdmin?'АДМИНИСТРАТОР':(isGuest?'ГОСТ':'БЕЗПЛАТЕН');
+  const planLabel=isAdmin?'АДМИНИСТРАТОР':isGuest?'ГОСТ':isPro()?'PRO':'БЕЗПЛАТЕН';
+  const pplanEl=document.getElementById('pplan');
+  pplanEl.textContent=planLabel;
+  pplanEl.style.background=isPro()?'#059669':isAdmin?'#8B5CF6':'var(--acc2)';
+  const upBanner=document.getElementById('pro-upgrade-banner');
+  if(upBanner)upBanner.style.display=(!isPro()&&!isGuest&&!isAdmin)?'block':'none';
   [['pav',true],['av',false]].forEach(([id,big])=>{
     const el=document.getElementById(id);
     if(photo)el.innerHTML=`<img src="${photo}" alt="">`;
@@ -1157,21 +1500,24 @@ async function upgradePro(){
 }
 
 // ══ CHECK UPDATES ══
+let lastDVData=JSON.parse(localStorage.getItem('napomni_dvdata')||'null');
+
 async function checkUpdates(){
   if(!fbOK)return;
   try{
     const doc=await db.collection('updates').doc('latest').get();
     if(doc.exists){
       const d=doc.data();
-      const lastSeen=localStorage.getItem('napomni_lastDV')||'';
-      if(d.dvBroi!==lastSeen){
-        const t=document.getElementById('toast');
-        t.textContent=`Нова актуализация: ДВ бр. ${d.dvBroi}/${d.dvDate}`;
-        t.style.background='var(--acc)';
-        t.classList.add('show');
-        setTimeout(()=>t.classList.remove('show'),5000);
-        localStorage.setItem('napomni_lastDV',d.dvBroi);
+      lastDVData={dvBroi:d.dvBroi,dvDate:d.dvDate,summary:d.summary,changes:d.changes||[]};
+      localStorage.setItem('napomni_dvdata',JSON.stringify(lastDVData));
+      if(isPro()){
+        const lastSeen=localStorage.getItem('napomni_lastDV')||'';
+        if(d.dvBroi!==lastSeen){
+          toast('📰 ДВ бр. '+d.dvBroi+'/'+d.dvDate+': '+d.summary,'#2563EB');
+          localStorage.setItem('napomni_lastDV',d.dvBroi);
+        }
       }
+      rHome();
     }
   }catch(e){}
 }
@@ -1196,6 +1542,22 @@ function closeLaw(){
   document.getElementById('law-frame').src='';
 }
 </script>
+<!-- PRO WALL -->
+<div class="overlay" id="pro-wall-ov" onclick="if(event.target===this)closeProWall()">
+  <div class="sheet" style="padding:0">
+    <div class="sh-handle"></div>
+    <div style="text-align:center;padding:32px 20px 28px">
+      <div style="font-size:44px;margin-bottom:12px">⭐</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:8px">НАПомни Pro</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:6px;line-height:1.6" id="pro-wall-feat"></div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:20px;line-height:1.7">✅ Неограничени фирми и срокове<br>✅ ЗБУТ срокове<br>✅ Наредба Н-18 справочник<br>✅ Счетоводен помощник<br>✅ Актуализация по Държавен вестник<br>✅ Push нотификации</div>
+      <div style="font-size:28px;font-weight:900;color:var(--acc);margin-bottom:20px">9.99 лв/мес</div>
+      <button class="btn-p" onclick="upgradePro()" style="margin-bottom:10px">⭐ Абонирай се за Pro</button>
+      <button class="btn-o" onclick="closeProWall()">Не сега</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="law-ov" onclick="if(event.target===this)closeLaw()">
   <div style="background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:760px;height:90vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--brd);flex-shrink:0">
