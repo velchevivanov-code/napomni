@@ -506,7 +506,10 @@ let S={
   settings:JSON.parse(localStorage.getItem('napomni_set')||'{"notif":true,"sound":false,"showDone":false}'),
 };
 // ══ PLAN HELPERS ══
-function isPro(){return S.plan==='pro'||(CU&&SUPER_ADMINS.includes(CU.email));}
+function isPro(){
+  if(SUPER_ADMINS.includes(CU?.email)) return true;
+  return S.plan==='pro';
+}
 function canAddCompany(){return isPro()||S.cos.length<1;}
 function getVisibleDeadlines(){
   let list=getFil();
