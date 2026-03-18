@@ -14,6 +14,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#E8EDF2;--surf:#FFFFFF;--card:#FFFFFF;--brd:#D1D9E0;--txt:#1A1D23;--sub:#6B7280;--mut:#9CA3AF;--acc:#2563EB;--acc2:#1D4ED8;--red:#DC2626;--orange:#D97706;--green:#059669;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;scrollbar-width:none}*::-webkit-scrollbar{display:none}
@@ -360,6 +361,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
       <button class="hlp-tab" id="htab-salary" onclick="setHTab('salary')">👤 Заплата</button>
       <button class="hlp-tab" id="htab-laws" onclick="setHTab('laws')">📚 Закони</button>
       <button class="hlp-tab" id="htab-checklist" onclick="setHTab('checklist')">✅ Чеклист</button>
+      <button class="hlp-tab" id="htab-dividend" onclick="setHTab('dividend')">💰 Дивиденти</button>
     </div>
     <div id="hlp-content"></div>
   </div>
@@ -1087,6 +1089,7 @@ function renderHelper(){
   else if(hTab==='salary') c.innerHTML=renderSalaryCalc();
   else if(hTab==='laws') c.innerHTML=renderLawsRef();
   else if(hTab==='checklist') c.innerHTML=renderChecklist();
+  else if(hTab==='dividend') c.innerHTML=renderDividendCalc();
 }
 
 function renderSolCalc(){
@@ -1222,6 +1225,279 @@ function toggleHlpChk(i){
   else hlpChecklist.push(i);
   localStorage.setItem('napomni_chk',JSON.stringify(hlpChecklist));
   renderHelper();
+}
+
+// ══ ДИВИДЕНТИ ══
+let divPartners=[{name:'',egn:'',share:'',method:'cash'}];
+
+function renderDividendCalc(){
+  const ac=getAc();
+  const firm=ac?ac.name:'—';
+  const eik=ac?ac.eik:'—';
+  const curYear=new Date().getFullYear();
+  const savedYear=localStorage.getItem('napomni_div_year')||String(curYear-1);
+  const savedTotal=localStorage.getItem('napomni_div_total')||'';
+  const savedPartners=localStorage.getItem('napomni_div_partners');
+  if(savedPartners){try{divPartners=JSON.parse(savedPartners);}catch(e){}}
+
+  const yearOptions=[];
+  for(let y=curYear;y>=curYear-10;y--) yearOptions.push(`<option value="${y}"${y==savedYear?' selected':''}>${y}</option>`);
+
+  const partnerRows=divPartners.map((p,i)=>`
+    <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--brd)" id="div-p-${i}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:800;color:var(--mut)">СЪДРУЖНИК ${i+1}</span>
+        ${divPartners.length>1?`<button onclick="divRemovePartner(${i})" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 6px">✕</button>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Име</div>
+          <input type="text" value="${p.name}" oninput="divUpdatePartner(${i},'name',this.value)"
+            placeholder="Иван Иванов"
+            style="width:100%;padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:12px;background:var(--surf);color:var(--txt)">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">ЕГН</div>
+          <input type="text" value="${p.egn}" oninput="divUpdatePartner(${i},'egn',this.value)"
+            placeholder="0000000000" maxlength="10"
+            style="width:100%;padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:12px;background:var(--surf);color:var(--txt)">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Дял %</div>
+          <input type="number" value="${p.share}" oninput="divUpdatePartner(${i},'share',this.value)"
+            placeholder="50" min="0" max="100" step="0.01"
+            style="width:100%;padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:12px;background:var(--surf);color:var(--txt)">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Начин на изплащане</div>
+          <select onchange="divUpdatePartner(${i},'method',this.value)"
+            style="width:100%;padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:12px;background:var(--surf);color:var(--txt)">
+            <option value="cash"${p.method==='cash'?' selected':''}>В брой</option>
+            <option value="bank"${p.method==='bank'?' selected':''}>По банков път</option>
+          </select>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return`<div style="background:var(--surf);border-radius:14px;padding:16px;border:1px solid var(--brd);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+    <div style="font-size:14px;font-weight:800;margin-bottom:14px">💰 Калкулатор дивиденти</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Година на печалбата</div>
+        <select id="div-year" onchange="localStorage.setItem('napomni_div_year',this.value)"
+          style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:8px;font-size:13px;background:var(--surf);color:var(--txt)">
+          ${yearOptions.join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Обща сума (лв.)</div>
+        <input type="number" id="div-total" value="${savedTotal}" min="0" step="0.01"
+          placeholder="10000.00"
+          oninput="localStorage.setItem('napomni_div_total',this.value)"
+          style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:8px;font-size:13px;background:var(--surf);color:var(--txt)">
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:800;margin-bottom:8px;color:var(--sub)">Съдружници</div>
+    <div id="div-partners-list">${partnerRows}</div>
+    <button onclick="divAddPartner()"
+      style="width:100%;padding:9px;border:1.5px dashed var(--brd);border-radius:10px;background:none;color:var(--acc);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:14px">
+      + Добави съдружник
+    </button>
+    <button onclick="divCalc()"
+      style="width:100%;padding:11px;background:var(--acc);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:8px">
+      Изчисли
+    </button>
+    <div id="div-result"></div>
+  </div>`;
+}
+
+function divUpdatePartner(i,field,val){
+  divPartners[i][field]=val;
+  localStorage.setItem('napomni_div_partners',JSON.stringify(divPartners));
+}
+
+function divAddPartner(){
+  divPartners.push({name:'',egn:'',share:'',method:'cash'});
+  localStorage.setItem('napomni_div_partners',JSON.stringify(divPartners));
+  renderHelper();
+}
+
+function divRemovePartner(i){
+  divPartners.splice(i,1);
+  localStorage.setItem('napomni_div_partners',JSON.stringify(divPartners));
+  renderHelper();
+}
+
+function divCalc(){
+  const total=parseFloat(document.getElementById('div-total').value)||0;
+  const year=document.getElementById('div-year').value;
+  if(!total){alert('Въведи обща сума за разпределяне.');return;}
+  const totalShare=divPartners.reduce((s,p)=>s+(parseFloat(p.share)||0),0);
+  if(Math.abs(totalShare-100)>0.01){alert(`Сумата на дяловете е ${totalShare.toFixed(2)}%, трябва да е 100%.`);return;}
+
+  const rows=divPartners.map(p=>{
+    const share=parseFloat(p.share)||0;
+    const brutto=+(total*(share/100)).toFixed(2);
+    const tax=+(brutto*0.05).toFixed(2);
+    const netto=+(brutto-tax).toFixed(2);
+    return{...p,share,brutto,tax,netto};
+  });
+
+  const totalTax=+rows.reduce((s,r)=>s+r.tax,0).toFixed(2);
+  const totalNetto=+rows.reduce((s,r)=>s+r.netto,0).toFixed(2);
+
+  const tableRows=rows.map(r=>`
+    <tr>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--brd)">${r.name||'—'}</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--brd);text-align:center">${r.share}%</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--brd);text-align:right">${r.brutto.toFixed(2)} лв.</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--brd);text-align:right;color:var(--red)">${r.tax.toFixed(2)} лв.</td>
+      <td style="padding:8px 10px;font-size:13px;font-weight:800;border-bottom:1px solid var(--brd);text-align:right;color:var(--green)">${r.netto.toFixed(2)} лв.</td>
+      <td style="padding:8px 10px;font-size:11px;border-bottom:1px solid var(--brd);text-align:center;color:var(--mut)">${r.method==='cash'?'В брой':'По банков път'}</td>
+    </tr>`).join('');
+
+  document.getElementById('div-result').innerHTML=`
+    <div style="margin-top:4px">
+      <div style="font-size:12px;font-weight:800;color:var(--sub);margin-bottom:8px">РЕЗУЛТАТ — данък дивидент 5% (чл.38 ЗДДФЛ)</div>
+      <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--brd)">
+        <table style="width:100%;border-collapse:collapse;min-width:420px">
+          <thead>
+            <tr style="background:var(--bg)">
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:left;border-bottom:1px solid var(--brd)">Съдружник</th>
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:center;border-bottom:1px solid var(--brd)">Дял</th>
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:right;border-bottom:1px solid var(--brd)">Брутно</th>
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:right;border-bottom:1px solid var(--brd)">Данък 5%</th>
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:right;border-bottom:1px solid var(--brd)">Нето</th>
+              <th style="padding:8px 10px;font-size:10px;color:var(--mut);font-weight:700;text-align:center;border-bottom:1px solid var(--brd)">Начин</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+          <tfoot>
+            <tr style="background:var(--bg)">
+              <td colspan="2" style="padding:8px 10px;font-size:12px;font-weight:800">Общо</td>
+              <td style="padding:8px 10px;font-size:12px;font-weight:800;text-align:right">${total.toFixed(2)} лв.</td>
+              <td style="padding:8px 10px;font-size:12px;font-weight:800;text-align:right;color:var(--red)">${totalTax.toFixed(2)} лв.</td>
+              <td style="padding:8px 10px;font-size:13px;font-weight:900;text-align:right;color:var(--green)">${totalNetto.toFixed(2)} лв.</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--mut);line-height:1.6">
+        Данъкът се удържа при изплащането и се внася до края на месеца следващ тримесечието (чл.65 ал.3 ЗДДФЛ).
+      </div>
+      <button onclick="divGenPDF()"
+        style="width:100%;padding:11px;background:#059669;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;margin-top:12px">
+        📄 Генерирай PDF
+      </button>
+    </div>`;
+  // store for PDF
+  window._divCalcData={rows,total,totalTax,totalNetto,year};
+}
+
+function divGenPDF(){
+  if(!window.jspdf){alert('jsPDF не е зареден. Провери интернет връзката.');return;}
+  const {jsPDF}=window.jspdf;
+  const data=window._divCalcData;
+  if(!data){alert('Първо изчисли дивидентите.');return;}
+  const ac=getAc();
+  const firm=ac?ac.name:'—';
+  const eik=ac?ac.eik:'—';
+  const {rows,total,totalTax,totalNetto,year}=data;
+  const today=new Date();
+  const dateStr=today.toLocaleDateString('bg-BG');
+
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+
+  // helper – draw text that falls back gracefully (jsPDF supports only Latin by default without fonts)
+  const W=210,M=20;
+  let y=M;
+  const line=(txt,sz,bold,clr)=>{
+    doc.setFontSize(sz||11);
+    doc.setFont('helvetica',bold?'bold':'normal');
+    if(clr)doc.setTextColor(...clr); else doc.setTextColor(30,30,30);
+    doc.text(txt,M,y);
+    y+=sz?sz*0.45+2:7;
+  };
+  const hline=()=>{doc.setDrawColor(180,180,180);doc.line(M,y,W-M,y);y+=4;};
+
+  // ── PAGE 1: Изчислителен лист ──
+  line('IZCHISLITELEN LIST ZA DIVIDENTI',16,true,[37,99,235]);
+  line(`Firma: ${firm}  |  EIK: ${eik}`,10,false,[80,80,80]);
+  line(`Godina na pechalba: ${year}  |  Data: ${dateStr}`,10,false,[80,80,80]);
+  y+=2; hline();
+
+  line('Sus. / Ime',11,true);
+  const cols=[M,80,115,145,175];
+  const heads=['Ime','Bryto lv.','Danyk 5%','Neto lv.','Nachin'];
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(100,100,100);
+  heads.forEach((h,i)=>doc.text(h,cols[i],y));
+  y+=5; hline();
+
+  rows.forEach(r=>{
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+    const vals=[
+      `${r.name||'—'} (${r.share}%)`,
+      r.brutto.toFixed(2),
+      r.tax.toFixed(2),
+      r.netto.toFixed(2),
+      r.method==='cash'?'V broi':'Banka'
+    ];
+    vals.forEach((v,i)=>doc.text(v,cols[i],y));
+    y+=6;
+    if(y>270){doc.addPage();y=M;}
+  });
+  hline();
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text(`Obshto bruto: ${total.toFixed(2)} lv.`,M,y); y+=6;
+  doc.setTextColor(220,38,38);
+  doc.text(`Obshto danyk: ${totalTax.toFixed(2)} lv.`,M,y); y+=6;
+  doc.setTextColor(5,150,105);
+  doc.text(`Obshto neto: ${totalNetto.toFixed(2)} lv.`,M,y); y+=10;
+  doc.setTextColor(120,120,120); doc.setFontSize(8);
+  doc.text('Danyk dividenti 5% (chl.38 ZDDFL). Vnasiа se do kraia na meseca sledvasht tримесечието (chl.65 al.3 ZDDFL).',M,y);
+
+  // ── PAGE 2: Протокол от ОС ──
+  doc.addPage(); y=M;
+  line('PROTOKOL OT OBSHTO SABRANIE',16,true,[37,99,235]);
+  line(`${firm}  |  EIK: ${eik}`,10,false,[80,80,80]);
+  y+=3; hline();
+  line(`Dnes, ${dateStr}, sadrujnitsite prieha sledното resenie:`,11);
+  y+=2;
+  line(`1. Razpredelqt se dividenti za ${year} g. v obshta suma ${total.toFixed(2)} lv.`,11);
+  y+=2;
+  line('2. Dividentat se izplashtat kato:',11);
+  rows.forEach(r=>{
+    line(`   - ${r.name||'—'} (${r.share}%): ${r.netto.toFixed(2)} lv. neto (${r.method==='cash'?'v broi':'po bankova smetka'})`,10);
+  });
+  y+=2;
+  line(`3. Udarzha se danyk 5% v obshta suma ${totalTax.toFixed(2)} lv. — vnasiа se v NRA.`,11);
+  y+=6; hline(); y+=4;
+  rows.forEach(r=>{
+    line(`Podpis: ${r.name||'—'} ___________________________`,11);
+    y+=2;
+  });
+
+  // ── PAGE 3: Документи за изплащане ──
+  doc.addPage(); y=M;
+  line('DOKUMENTI ZA IZPLASHTANE',16,true,[37,99,235]);
+  line(`${firm}  |  EIK: ${eik}  |  ${dateStr}`,10,false,[80,80,80]);
+  y+=3; hline();
+
+  rows.forEach((r,idx)=>{
+    if(y>240){doc.addPage();y=M;}
+    line(`Razpisка №${idx+1} — ${r.method==='cash'?'V BROI':'BANKOVO NAREDVANE'}`,12,true,[37,99,235]);
+    line(`Poluchatel: ${r.name||'—'}  |  EGN: ${r.egn||'—'}`,10);
+    line(`Suma bruto: ${r.brutto.toFixed(2)} lv.  |  Danyk 5%: ${r.tax.toFixed(2)} lv.  |  Suma neto: ${r.netto.toFixed(2)} lv.`,10);
+    line(`Osnование: Dividend za ${year} g. — dyal ${r.share}%`,10);
+    y+=4;
+    line('Izplatil: ___________________________    Poluchil: ___________________________',10,false,[120,120,120]);
+    y+=6; hline();
+  });
+
+  doc.save(`dividenti_${firm.replace(/\s/g,'_')}_${year}.pdf`);
 }
 
 // ══ НАРЕДБА Н-18 ══
