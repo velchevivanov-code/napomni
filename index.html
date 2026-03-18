@@ -414,7 +414,8 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 <script>
 // ══ FIREBASE ══
 const FBCFG={apiKey:"AIzaSyCZ-M2rRZCA6mwcDLV0lxNpGa8gINrnjxE",authDomain:"napomni-abae3.firebaseapp.com",projectId:"napomni-abae3",storageBucket:"napomni-abae3.firebasestorage.app",messagingSenderId:"469508428647",appId:"1:469508428647:web:5b34a7bd7b2956d6a795c2",measurementId:"G-FT3VKM1C36"};
-const ADMINS=["тук_сложи_твоя_имейл@gmail.com"];
+const ADMINS=["velchevivanov@gmail.com"];
+const SUPER_ADMINS=["velchevivanov@gmail.com"];
 let db=null,auth=null,fbOK=false;
 try{firebase.initializeApp(FBCFG);db=firebase.firestore();auth=firebase.auth();fbOK=true;}catch(e){console.warn('FB:',e.message);}
 
@@ -505,7 +506,7 @@ let S={
   settings:JSON.parse(localStorage.getItem('napomni_set')||'{"notif":true,"sound":false,"showDone":false}'),
 };
 // ══ PLAN HELPERS ══
-function isPro(){return S.plan==='pro';}
+function isPro(){return S.plan==='pro'||(CU&&SUPER_ADMINS.includes(CU.email));}
 function canAddCompany(){return isPro()||S.cos.length<1;}
 function getVisibleDeadlines(){
   let list=getFil();
