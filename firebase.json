@@ -1,1 +1,22 @@
-{"hosting":{"public":".","ignore":["firebase.json","firestore.rules","functions/**","*.md","*.zip"],"rewrites":[{"source":"**","destination":"/index.html"}],"headers":[{"source":"firebase-messaging-sw.js","headers":[{"key":"Service-Worker-Allowed","value":"/"}]}]},"firestore":{"rules":"firestore.rules"},"functions":{"source":"functions"}}
+{
+  "hosting": {
+    "public": ".",
+    "ignore": ["firebase.json", "firestore.rules", "functions/**", "netlify/**", "netlify.toml", "node_modules/**", "package.json", "package-lock.json", "*.md", "*.zip", ".netlify/**", ".git/**"],
+    "rewrites": [{"source": "**", "destination": "/index.html"}],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {"key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.google.com https://www.gstatic.com; frame-src https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"},
+          {"key": "X-Content-Type-Options", "value": "nosniff"},
+          {"key": "X-Frame-Options", "value": "DENY"},
+          {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}
+        ]
+      },
+      {"source": "service-worker.js", "headers": [{"key": "Service-Worker-Allowed", "value": "/"}, {"key": "Cache-Control", "value": "no-cache"}]},
+      {"source": "index.html", "headers": [{"key": "Cache-Control", "value": "no-cache"}]}
+    ]
+  },
+  "firestore": {"rules": "firestore.rules"},
+  "functions": {"source": "functions"}
+}

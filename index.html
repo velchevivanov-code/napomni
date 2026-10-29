@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="НАПомни">
 <title>НАПомни — Данъчни срокове 2026</title>
-<!-- CSP removed: was blocking Google Auth popup (accounts.google.com not whitelisted) -->
+<!-- CSP се задава като HTTP header в _headers (Netlify) и firebase.json (Firebase Hosting) -->
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -456,9 +456,31 @@ const LF=[
   {c:"KOOP",l:"Кооп.",f:"Кооперация",h:"Подобно на ООД — ЗКПО и ГФО"},
 ];
 
+// ══ РАБОТНИ ДНИ (ДОПК чл. 22, ал. 7 — срок, изтичащ в неработен ден, изтича в първия следващ работен ден) ══
+const pad2=n=>String(n).padStart(2,'0');
+const isoU=d=>`${d.getUTCFullYear()}-${pad2(d.getUTCMonth()+1)}-${pad2(d.getUTCDate())}`;
+const parseIsoU=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));};
+// Православен Великден (алгоритъм на Meeus, юлиански → григориански, валидно 1900–2099)
+function orthodoxEaster(y){const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7;const month=Math.floor((d+e+114)/31),day=((d+e+114)%31)+1;return new Date(Date.UTC(y,month-1,day+13));}
+const holidayCache={};
+function bgHolidays(y){
+  if(holidayCache[y])return holidayCache[y];
+  const set=new Set();
+  const easter=orthodoxEaster(y);
+  for(const off of[-2,-1,0,1]){const d=new Date(easter);d.setUTCDate(d.getUTCDate()+off);set.add(isoU(d));}
+  const fixed=[[1,1],[3,3],[5,1],[5,6],[5,24],[9,6],[9,22],[12,24],[12,25],[12,26]];
+  for(const[m,d]of fixed){
+    const dt=new Date(Date.UTC(y,m-1,d));set.add(isoU(dt));
+    // КТ чл. 154, ал. 2 — празник в събота/неделя се почива в следващия работен ден
+    if(dt.getUTCDay()===0||dt.getUTCDay()===6){const nx=new Date(dt);do{nx.setUTCDate(nx.getUTCDate()+1);}while(nx.getUTCDay()===0||nx.getUTCDay()===6||set.has(isoU(nx)));set.add(isoU(nx));}
+  }
+  return holidayCache[y]=set;
+}
+function nextWorkday(dateIso){let d=parseIsoU(dateIso);while(d.getUTCDay()===0||d.getUTCDay()===6||bgHolidays(d.getUTCFullYear()).has(isoU(d)))d.setUTCDate(d.getUTCDate()+1);return isoU(d);}
+
 // ══ DEADLINES ══
 const Y=new Date().getFullYear();
-const mo=(m,d)=>`${Y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const mo=(m,d)=>nextWorkday(`${Y}-${pad2(m)}-${pad2(d)}`);
 const MN=["януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември"];
 const MS=["яну","фев","мар","апр","май","юни","юли","авг","сеп","окт","ное","дек"];
 const GC={"ДДС":"#e63946","Осигуровки":"#f4a261","Данъци":"#8338ec","Годишни":"#06d6a0","Статистика":"#3a86ff","Регистрации":"#fb5607","ЗБУТ":"#6366F1"};
@@ -494,18 +516,21 @@ const BDB=[
 
 // ══ STATE ══
 const now=new Date();now.setHours(0,0,0,0);
-const dTo=d=>Math.ceil((new Date(d)-now)/86400000);
-const fmtL=d=>new Date(d).toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
-const fmtS=d=>{const x=new Date(d);return`${x.getDate()} ${MS[x.getMonth()]}`;};
+// Датите са 'YYYY-MM-DD' — парсваме ги като локални, иначе new Date('2026-01-14') е UTC и брои +1 ден в България
+const pd=d=>{if(d instanceof Date)return d;const[y,m,dd]=String(d).split('-').map(Number);return new Date(y,m-1,dd);};
+const dTo=d=>Math.round((pd(d)-now)/86400000);
+const fmtL=d=>pd(d).toLocaleDateString('bg-BG',{day:'numeric',month:'long',year:'numeric'});
+const fmtS=d=>{const x=pd(d);return`${x.getDate()} ${MS[x.getMonth()]}`;};
 
 let CU=null,isGuest=false,isAdmin=false,extraDl=[];
+localStorage.removeItem('napomni_plan'); // планът вече идва само от сървъра
 let S={
   tab:'home',prevTab:'home',sel:null,full:false,ag:'Всички',
-  plan: localStorage.getItem('napomni_plan')||'free',
+  plan:'free',
   cos:JSON.parse(localStorage.getItem('napomni_cos')||'[]'),
   rem:JSON.parse(localStorage.getItem('napomni_rem')||'[]'),
   done:JSON.parse(localStorage.getItem('napomni_done')||'[]'),
-  settings:JSON.parse(localStorage.getItem('napomni_set')||'{"notif":true,"sound":false,"showDone":false}'),
+  settings:JSON.parse(localStorage.getItem('napomni_set')||'{"notif":false,"sound":false,"showDone":false}'),
 };
 // ══ PLAN HELPERS ══
 function isPro(){
@@ -519,15 +544,17 @@ function getVisibleDeadlines(){
   return list;
 }
 
-// Sanitize user input to prevent XSS
-function san(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+// Sanitize user input to prevent XSS (безопасно и в текст, и в HTML атрибути)
+function san(s){if(s===undefined||s===null)return'';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// Само http(s) URL за снимки от профили
+function safeUrl(u){return/^https?:\/\//i.test(u||'')?san(u):'';}
 // Session timeout — auto logout after 24h
 let lastAct=Date.now();
 document.addEventListener('click',()=>{lastAct=Date.now();});
 setInterval(()=>{if(Date.now()-lastAct>86400000&&CU&&!isGuest){doSignOut();toast('⏰ Сесията изтече','#d97706');}},60000);
 if(!S.cos.length) S.cos=[{id:1,name:'Офис Систем ЕООД',lf:'EOOD',vat:true,sol:true,emp:false,nkid:'62.01',nkidL:'Разработване на софтуер',eik:'',mol:'',notes:'',active:true}];
 
-function allDl(){return[...BDB,...extraDl].sort((a,b)=>new Date(a.date)-new Date(b.date));}
+function allDl(){return[...BDB,...extraDl].sort((a,b)=>pd(a.date)-pd(b.date));}
 function getAc(){return S.cos.find(c=>c.active)||null;}
 function getFil(){
   const ac=getAc();
@@ -548,14 +575,13 @@ function getFil(){
     if(d.id==='ddfl' && !['ET','SOL','ZZD','DZZD'].includes(ac.lf))return false;
     if(d.id==='sol_izr' && !['ET','SOL'].includes(ac.lf))return false;
     return true;
-  }).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  }).sort((a,b)=>pd(a.date)-pd(b.date));
 }
 
 async function save(){
   localStorage.setItem('napomni_cos',JSON.stringify(S.cos));
   localStorage.setItem('napomni_rem',JSON.stringify(S.rem));
   localStorage.setItem('napomni_done',JSON.stringify(S.done));
-  localStorage.setItem('napomni_plan',S.plan);
   if(fbOK&&CU&&!isGuest){
     try{await db.collection('users').doc(CU.uid).set({cos:S.cos,rem:S.rem,done:S.done,upd:new Date()},{merge:true});}catch(e){}
   }
@@ -565,11 +591,17 @@ async function loadUD(){
   if(fbOK&&CU&&!isGuest){
     try{
       const doc=await db.collection('users').doc(CU.uid).get();
-      if(doc.exists){const d=doc.data();if(d.cos)S.cos=d.cos;if(d.rem)S.rem=d.rem;if(d.done)S.done=d.done;if(d.plan)S.plan=d.plan;}
+      if(doc.exists){const d=doc.data();if(d.cos)S.cos=d.cos;if(d.rem)S.rem=d.rem;if(d.done)S.done=d.done;S.plan=d.plan==='pro'?'pro':'free';}
       const snap=await db.collection('deadlines').get();
-      extraDl=snap.docs.map(d=>({id:d.id,...d.data()}));
-    }catch(e){}
+      extraDl=snap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>typeof d.date==='string');
+    }catch(e){console.warn('loadUD:',e.message);}
   }
+}
+// Само планът — ползва се след плащане, докато Stripe webhook-ът запише plan:'pro'
+async function refreshPlan(){
+  if(!(fbOK&&CU&&!isGuest))return S.plan;
+  try{const doc=await db.collection('users').doc(CU.uid).get();S.plan=doc.exists&&doc.data().plan==='pro'?'pro':'free';}catch(e){}
+  return S.plan;
 }
 
 // ══ TOAST ══
@@ -662,7 +694,7 @@ function rHome(){
   // Активна фирма
   if(ac){
     const lf=LF.find(f=>f.c===ac.lf);
-    h+=`<div class="act-banner"><div style="font-size:10px;font-weight:800;color:var(--acc);letter-spacing:1px;margin-bottom:5px">АКТИВНА ФИРМА</div><div style="font-family:'DM Serif Display',serif;font-size:17px">${ac.name}</div><div style="font-size:11px;color:var(--sub);margin-top:4px">${lf?.f||''}${ac.vat?' · ДДС':''}${ac.sol?' · СОЛ':''}${ac.emp?' · Работодател':''}</div>${ac.nkid?`<div style="font-size:10px;color:var(--mut);margin-top:3px">НКИД ${ac.nkid} — ${ac.nkidL||''}</div>`:''}</div>`;
+    h+=`<div class="act-banner"><div style="font-size:10px;font-weight:800;color:var(--acc);letter-spacing:1px;margin-bottom:5px">АКТИВНА ФИРМА</div><div style="font-family:'DM Serif Display',serif;font-size:17px">${san(ac.name)}</div><div style="font-size:11px;color:var(--sub);margin-top:4px">${lf?.f||''}${ac.vat?' · ДДС':''}${ac.sol?' · СОЛ':''}${ac.emp?' · Работодател':''}</div>${ac.nkid?`<div style="font-size:10px;color:var(--mut);margin-top:3px">НКИД ${san(ac.nkid)} — ${san(ac.nkidL)}</div>`:''}</div>`;
   } else {
     h+=`<div class="add-banner" onclick="goTab('company')"><div style="font-size:28px;margin-bottom:6px">🏢</div><div style="font-size:13px;color:var(--acc);font-weight:700">Добавете вашата фирма →</div><div style="font-size:11px;color:var(--mut);margin-top:3px">Срокове се филтрират автоматично</div></div>`;
   }
@@ -675,7 +707,7 @@ function rHome(){
   const firstDayCmon=(new Date(cy,cmon,1).getDay()+6)%7;
   const dlDaysCmon={};
   list.forEach(d=>{
-    const dd=new Date(d.date);
+    const dd=pd(d.date);
     if(dd.getFullYear()===cy&&dd.getMonth()===cmon){
       const day=dd.getDate();
       if(!dlDaysCmon[day])dlDaysCmon[day]=[];
@@ -814,10 +846,10 @@ function rCo(){
     return`<div class="co-card ${co.active?'act':''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${co.name}</div>
+          <div style="font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${san(co.name)}</div>
           <div style="font-size:11px;color:var(--sub);margin-top:3px">${lf?.f||''}</div>
-          ${co.eik?`<div style="font-size:10px;color:var(--mut);margin-top:2px">ЕИК: ${co.eik}</div>`:''}
-          ${co.nkid?`<div style="font-size:10px;color:var(--mut);margin-top:1px">НКИД ${co.nkid} — ${co.nkidL||''}</div>`:''}
+          ${co.eik?`<div style="font-size:10px;color:var(--mut);margin-top:2px">ЕИК: ${san(co.eik)}</div>`:''}
+          ${co.nkid?`<div style="font-size:10px;color:var(--mut);margin-top:1px">НКИД ${san(co.nkid)} — ${san(co.nkidL)}</div>`:''}
         </div>
         ${co.active?`<span style="background:var(--acc);color:var(--bg);border-radius:8px;padding:2px 9px;font-size:9px;font-weight:800;flex-shrink:0;margin-left:8px">АКТИВНА</span>`:''}
       </div>
@@ -861,21 +893,21 @@ function openCoSheet(editId=null){
   const lopts=LF.map(f=>`<option value="${f.c}" ${co?.lf===f.c?'selected':''}>${f.l} — ${f.f}</option>`).join('');
   document.getElementById('co-sh-body').innerHTML=`
     <label class="f-lbl">Наименование *</label>
-    <input class="f-inp" id="co-nm" placeholder="пр. Флора Груп ЕООД" value="${co?.name||''}">
+    <input class="f-inp" id="co-nm" placeholder="пр. Флора Груп ЕООД" value="${san(co?.name)}">
     <label class="f-lbl">ЕИК / БУЛСТАТ</label>
-    <input class="f-inp" id="co-ek" placeholder="123456789" value="${co?.eik||''}" inputmode="numeric">
+    <input class="f-inp" id="co-ek" placeholder="123456789" value="${san(co?.eik)}" inputmode="numeric">
     <label class="f-lbl">МОЛ</label>
-    <input class="f-inp" id="co-ml" placeholder="Иван Петров" value="${co?.mol||''}">
+    <input class="f-inp" id="co-ml" placeholder="Иван Петров" value="${san(co?.mol)}">
     <label class="f-lbl">Правна форма *</label>
     <select class="f-sel" id="co-lf" onchange="showLfHint()">${lopts}</select>
     <div id="lf-hint" style="font-size:11px;color:var(--mut);margin:-8px 0 12px;padding:0 2px"></div>
     <label class="f-lbl">Сектор по НКИД 2008 (търси по код или дейност)</label>
-    <input class="nkid-q" id="nkid-q" placeholder="пр. 10.52 или сладолед или хляб..." oninput="searchNkid()" value="${co?.nkid?co.nkid+' — '+(co.nkidL||''):''}">
+    <input class="nkid-q" id="nkid-q" placeholder="пр. 10.52 или сладолед или хляб..." oninput="searchNkid()" value="${co?.nkid?san(co.nkid+' — '+(co.nkidL||'')):''}">
     <div class="nkid-list" id="nkid-list" style="display:none"></div>
-    <input type="hidden" id="nkid-v" value="${co?.nkid||''}">
-    <input type="hidden" id="nkidl-v" value="${co?.nkidL||''}">
+    <input type="hidden" id="nkid-v" value="${san(co?.nkid)}">
+    <input type="hidden" id="nkidl-v" value="${san(co?.nkidL)}">
     <div id="nkid-sel-box" style="${co?.nkid?'':'display:none'}" class="nkid-sel">
-      <span id="nkid-sel-txt">${co?.nkid?`<span style="color:var(--acc);font-weight:700">${co.nkid}</span> — ${co.nkidL||''}`:'Не е избран'}</span>
+      <span id="nkid-sel-txt">${co?.nkid?`<span style="color:var(--acc);font-weight:700">${san(co.nkid)}</span> — ${san(co.nkidL)}`:'Не е избран'}</span>
       <span onclick="clearNkid()" style="color:var(--mut);cursor:pointer;font-size:16px">✕</span>
     </div>
     <label class="f-lbl" style="margin-top:4px">Данъчен статус</label>
@@ -883,7 +915,7 @@ function openCoSheet(editId=null){
     <label class="f-check"><input type="checkbox" id="co-sol" ${co?.sol?'checked':''}><div><div style="font-size:13px;font-weight:600">Самоосигуряващо се лице (СОЛ)</div><div style="font-size:10px;color:var(--mut)">Собственик/управител — лични осигуровки до 25-то</div></div></label>
     <label class="f-check"><input type="checkbox" id="co-emp" ${co?.emp?'checked':''}><div><div style="font-size:13px;font-weight:600">Има назначени служители</div><div style="font-size:10px;color:var(--mut)">Добавя осигуровките за работодатели + Декл. обр. 1 и 6</div></div></label>
     <label class="f-lbl">Бележки</label>
-    <textarea class="f-ta" id="co-nt" placeholder="Допълнителна информация...">${co?.notes||''}</textarea>
+    <textarea class="f-ta" id="co-nt" placeholder="Допълнителна информация...">${san(co?.notes)}</textarea>
   `;
   document.getElementById('co-ov').classList.add('open');
   showLfHint();
@@ -915,7 +947,7 @@ function pickNkid(code,label){
   document.getElementById('nkid-list').style.display='none';
   const box=document.getElementById('nkid-sel-box');
   box.style.display='flex';
-  document.getElementById('nkid-sel-txt').innerHTML=`<span style="color:var(--acc);font-weight:700">${code}</span> — ${label}`;
+  document.getElementById('nkid-sel-txt').innerHTML=`<span style="color:var(--acc);font-weight:700">${san(code)}</span> — ${san(label)}`;
 }
 
 function clearNkid(){
@@ -1009,8 +1041,8 @@ function rSet(){
     <div style="background:var(--surf);border-radius:16px;padding:0 16px;border:1px solid var(--brd);margin-bottom:14px">
       <div style="padding:13px 0;border-bottom:1px solid var(--brd)">
         <div style="font-size:11px;font-weight:800;color:var(--mut);letter-spacing:.7px;text-transform:uppercase;margin-bottom:10px">АКАУНТ</div>
-        <div style="font-size:13px;font-weight:700;color:var(--txt)">${CU?.displayName||'Гост'}</div>
-        <div style="font-size:11px;color:var(--mut);margin-top:2px">${CU?.email||(isGuest?'Гост режим — без регистрация':'')}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">${san(CU?.displayName)||'Гост'}</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:2px">${san(CU?.email)||(isGuest?'Гост режим — без регистрация':'')}</div>
       </div>
       <div style="padding:13px 0">
         <button class="btn-d" onclick="confirmSignOut()">🚪 ${isGuest?'Влез в профил':'Изход от акаунта'}</button>
@@ -1047,7 +1079,12 @@ function rSet(){
   `;
 }
 
-function toggleSet(key){
+async function toggleSet(key){
+  if(key==='notif'&&!S.settings.notif){
+    if(!isPro()){showProWall('Push нотификации');return;}
+    if(!await enablePush(false))return;
+  }
+  if(key==='notif'&&S.settings.notif)await disablePush();
   S.settings[key]=!S.settings[key];
   localStorage.setItem('napomni_set',JSON.stringify(S.settings));
   rSet();
@@ -1571,7 +1608,6 @@ function showProWall(feature){
   document.getElementById('pro-wall-ov').classList.add('open');
 }
 function closeProWall(){document.getElementById('pro-wall-ov').classList.remove('open');}
-function upgradePro(){toast('⭐ Скоро! Stripe интеграция идва.');closeProWall();}
 
 // ══ PROFILE ══
 function openP(){document.getElementById('pmv').classList.add('open');}
@@ -1591,13 +1627,13 @@ function updatePUI(){
   if(upBanner)upBanner.style.display=(!isPro()&&!isGuest&&!isAdmin)?'block':'none';
   [['pav',true],['av',false]].forEach(([id,big])=>{
     const el=document.getElementById(id);
-    if(photo)el.innerHTML=`<img src="${photo}" alt="">`;
+    if(safeUrl(photo))el.innerHTML=`<img src="${safeUrl(photo)}" alt="">`;
     else el.textContent=init;
   });
   document.getElementById('pmi-adm').style.display=isAdmin?'flex':'none';
   const so=document.getElementById('p-so');
   so.onclick=isGuest?()=>{closeP();document.getElementById('auth-scr').style.display='flex';document.getElementById('app').style.display='none';isGuest=false;}:()=>{closeP();confirmSignOut();};
-  document.getElementById('p-so-txt').innerHTML=isGuest?'<div style="font-size:13px;font-weight:600">Влез в профил</div><div style="font-size:10px;color:var(--mut)">Регистрирай се безплатно</div>':'<div style="font-size:13px;font-weight:600">Изход</div><div style="font-size:10px;color:var(--mut)">Излез от '+email+'</div>';
+  document.getElementById('p-so-txt').innerHTML=isGuest?'<div style="font-size:13px;font-weight:600">Влез в профил</div><div style="font-size:10px;color:var(--mut)">Регистрирай се безплатно</div>':'<div style="font-size:13px;font-weight:600">Изход</div><div style="font-size:10px;color:var(--mut)">Излез от '+san(email)+'</div>';
 }
 
 // ══ AUTH ══
@@ -1640,8 +1676,8 @@ function guestMode(){
   toast('👤 Работите като гост');
 }
 async function doSignOut(){
-  if(fbOK&&auth.currentUser)await auth.signOut();
-  CU=null;isGuest=false;isAdmin=false;S.cos=[];S.rem=[];
+  if(fbOK&&auth.currentUser){await disablePush();await auth.signOut();}
+  CU=null;isGuest=false;isAdmin=false;S.cos=[];S.rem=[];S.done=[];S.plan='free';
   document.getElementById('app').style.display='none';
   document.getElementById('auth-scr').style.display='flex';
 }
@@ -1659,6 +1695,8 @@ function initApp(){
       document.getElementById('app').style.display='flex';
       updatePUI();rHome();rDl();rCo();
       checkUpdates();
+      handleCheckoutReturn();
+      if(isPro()&&S.settings.notif)enablePush(true);
       try{await db.collection('users').doc(user.uid).set({name:user.displayName||'',email:user.email,photo:user.photoURL||'',lastLogin:new Date()},{merge:true});}catch(e){}
     }else{
       document.getElementById('auth-scr').style.display='flex';
@@ -1688,12 +1726,12 @@ async function openAdm(){
       const rows=snap.docs.map(doc=>{
         const d=doc.data();tc+=(d.cos||[]).length;tr+=(d.rem||[]).length;
         const init=(d.name||d.email||'?')[0].toUpperCase();
-        return`<div class="u-row"><div class="u-av">${d.photo?`<img src="${d.photo}" alt="">`:init}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name||'(без име)'}</div><div style="font-size:10px;color:var(--mut)">${d.email||''}</div></div><span style="background:var(--card);color:var(--mut);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:700">${(d.cos||[]).length} фирми</span></div>`;
+        return`<div class="u-row"><div class="u-av">${safeUrl(d.photo)?`<img src="${safeUrl(d.photo)}" alt="">`:san(init)}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${san(d.name)||'(без име)'}</div><div style="font-size:10px;color:var(--mut)">${san(d.email)}</div></div><span style="background:var(--card);color:var(--mut);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:700">${(d.cos||[]).length} фирми</span></div>`;
       }).join('');
       document.getElementById('as-c').textContent=tc;
       document.getElementById('as-r').textContent=tr;
       document.getElementById('adm-ul').innerHTML=rows||'<div style="color:var(--mut);font-size:12px">Няма регистрирани потребители</div>';
-    }catch(e){document.getElementById('adm-ul').innerHTML=`<div style="color:var(--red);font-size:12px">Грешка: ${e.message}</div>`;}
+    }catch(e){document.getElementById('adm-ul').innerHTML=`<div style="color:var(--red);font-size:12px">Грешка: ${san(e.message)}</div>`;}
   }else{
     document.getElementById('as-u').textContent='–';
     document.getElementById('as-c').textContent=S.cos.length;
@@ -1707,7 +1745,7 @@ async function saveAdmDl(){
   if(!title){toast('⚠️ Въведете заглавие','#f97316');return;}
   const di=document.getElementById('adl-d').value.trim();
   const nd={id:'c_'+Date.now(),title,group:document.getElementById('adl-g').value,date:`${Y}-${di}`,color:GC[document.getElementById('adl-g').value]||'#38bdf8',sub:document.getElementById('adl-n').value,note:document.getElementById('adl-n').value,full:document.getElementById('adl-f').value,law:document.getElementById('adl-l').value,lawUrl:document.getElementById('adl-u').value,action:document.getElementById('adl-ac').value,penalty:document.getElementById('adl-p').value,tags:[document.getElementById('adl-g').value],vat:false,sol:false,emp:false};
-  if(fbOK&&CU){try{await db.collection('deadlines').doc(nd.id).set(nd);}catch(e){}}
+  if(fbOK&&CU){try{await db.collection('deadlines').doc(nd.id).set(nd);}catch(e){toast('⚠️ Firestore отказа записа: '+e.message,'#dc2626');return;}}
   extraDl.push(nd);
   document.getElementById('as-d').textContent=allDl().length;
   toast('✅ Срокът е добавен!');
@@ -1771,12 +1809,30 @@ async function upgradePro(){
   if(!CU||isGuest){toast('⚠️ Влезте в профил за да продължите','#d97706');return;}
   toast('⏳ Пренасочване към плащане...','#2563EB');
   try{
-    const res=await fetch('/.netlify/functions/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:CU.uid,email:CU.email})});
-    const{url}=await res.json();
-    window.location.href=url;
+    const idToken=await CU.getIdToken();
+    const res=await fetch('/.netlify/functions/create-checkout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken}});
+    const data=await res.json().catch(()=>({}));
+    if(res.status===409){await refreshPlan();updatePUI();rHome();rDl();toast('⭐ Вече имате Pro план');return;}
+    if(!res.ok||!data.url)throw new Error(data.error||res.status);
+    window.location.href=data.url;
   }catch(e){
+    console.warn('checkout:',e.message);
     toast('⚠️ Грешка при плащане. Опитайте пак.','#dc2626');
   }
+}
+
+// Връщане от Stripe Checkout — изчакваме webhook-а да запише plan:'pro'
+async function handleCheckoutReturn(){
+  const st=new URLSearchParams(location.search).get('checkout');
+  if(!st)return;
+  history.replaceState(null,'',location.pathname);
+  if(st==='cancel'){toast('Плащането е отказано','#d97706');return;}
+  toast('⏳ Потвърждаваме плащането...','#2563EB');
+  for(let i=0;i<10;i++){
+    if(await refreshPlan()==='pro'){updatePUI();rHome();rDl();if(typeof rSet==='function')rSet();toast('🎉 Добре дошли в НАПомни Pro!');if(S.settings.notif)enablePush(true);return;}
+    await new Promise(r=>setTimeout(r,2000));
+  }
+  toast('Плащането се обработва — Pro ще се активира до минути','#d97706');
 }
 
 // ══ CHECK UPDATES ══
@@ -1803,7 +1859,46 @@ async function checkUpdates(){
 }
 
 // ══ PWA ══
-let dp=null;
+let dp=null,swReg=null;
+const swReady=('serviceWorker' in navigator)?navigator.serviceWorker.register('/service-worker.js').then(r=>swReg=r).catch(e=>{console.warn('SW:',e.message);return null;}):Promise.resolve(null);
+// Чистим стария отделен firebase-messaging-sw.js, ако е бил регистриран
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if((r.active||r.installing||r.waiting)?.scriptURL?.endsWith('/firebase-messaging-sw.js'))r.unregister();})).catch(()=>{});
+
+// ══ PUSH (FCM) ══
+let fcmToken=null;
+function pushSupported(){return fbOK&&'Notification' in window&&'serviceWorker' in navigator&&firebase.messaging&&firebase.messaging.isSupported&&firebase.messaging.isSupported();}
+// silent=true → без toast-ове и без питане за разрешение (само ако вече е дадено)
+async function enablePush(silent){
+  if(!CU||isGuest){if(!silent)toast('⚠️ Влезте в профил за push известия','#d97706');return false;}
+  if(!pushSupported()){if(!silent)toast('⚠️ Браузърът не поддържа push известия','#d97706');return false;}
+  try{
+    if(Notification.permission!=='granted'){
+      if(silent)return false;
+      if(await Notification.requestPermission()!=='granted'){toast('🔕 Известията са блокирани от браузъра','#d97706');return false;}
+    }
+    const reg=await swReady;
+    if(!reg)throw new Error('no service worker');
+    const token=await firebase.messaging().getToken({serviceWorkerRegistration:reg});
+    if(!token)throw new Error('no token');
+    fcmToken=token;
+    await db.collection('fcmTokens').doc(token).set({token,userId:CU.uid,ua:navigator.userAgent.slice(0,200),upd:new Date()});
+    return true;
+  }catch(e){
+    console.warn('push:',e.message);
+    if(!silent)toast('⚠️ Неуспешно включване на известия','#dc2626');
+    return false;
+  }
+}
+async function disablePush(){
+  try{
+    if(!pushSupported())return;
+    const reg=await swReady;
+    const token=fcmToken||(reg&&Notification.permission==='granted'?await firebase.messaging().getToken({serviceWorkerRegistration:reg}):null);
+    if(token&&CU){try{await db.collection('fcmTokens').doc(token).delete();}catch(e){}}
+    try{await firebase.messaging().deleteToken();}catch(e){}
+    fcmToken=null;
+  }catch(e){console.warn('push off:',e.message);}
+}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;});
 window.addEventListener('appinstalled',()=>toast('🎉 Инсталирано!'));
 
