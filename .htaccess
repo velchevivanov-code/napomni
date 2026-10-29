@@ -1,0 +1,20 @@
+# НАПомни — настройки за Apache/LiteSpeed (Namecheap хостинг).
+# Сложи този файл в същата папка като index.html (напр. public_html/app/).
+
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com https://apis.google.com https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.google.com https://www.gstatic.com https://*.cloudfunctions.net; frame-src https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Без кеш за SW и HTML — иначе потребителите остават на стара версия
+  <FilesMatch "^(service-worker\.js|index\.html)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# Служебните файлове на проекта да не се сервират
+<FilesMatch "^(firestore\.rules|firebase\.json|\.firebaserc|.*\.md)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 ^.*/functions/.*$

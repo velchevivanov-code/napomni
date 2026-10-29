@@ -141,7 +141,7 @@ exports.deadlineNotifier = onSchedule(
               token: t.token,
               notification: { title, body },
               data: { deadlineId: String(d.id) },
-              webpush: { fcmOptions: { link: "/" }, notification: { tag: "napomni-" + d.id, requireInteraction: true } },
+              webpush: { fcmOptions: { link: APP_URL.value() }, notification: { tag: "napomni-" + d.id, requireInteraction: true } },
             });
             sent++;
           } catch (e) {
@@ -156,3 +156,128 @@ exports.deadlineNotifier = onSchedule(
     console.log(`Push: ${sent} sent, ${failed} failed, ${invalid.length} cleaned`);
   }
 );
+
+// ══ STRIPE ══
+// Secrets: firebase functions:secrets:set STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
+// Params (питат се при deploy): STRIPE_PRICE_ID, APP_URL
+const { onRequest } = require("firebase-functions/v2/https");
+const { defineSecret, defineString } = require("firebase-functions/params");
+const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
+const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
+const STRIPE_PRICE_ID = defineString("STRIPE_PRICE_ID");
+// Адресът на приложението — за връщане след плащане
+const APP_URL = defineString("APP_URL", { default: "https://napomniapp.site/app/" });
+const REGION = "europe-west1";
+const ACTIVE_STATUSES = ["active", "trialing", "past_due"];
+
+function appOrigin() { return new URL(APP_URL.value()).origin; }
+
+exports.createCheckout = onRequest({ region: REGION, secrets: [STRIPE_SECRET_KEY], cors: false }, async (req, res) => {
+  // CORS само за домейна на приложението (+ localhost за тестове)
+  const origin = req.get("Origin") || "";
+  const allowed = origin === appOrigin() || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  if (allowed) {
+    res.set("Access-Control-Allow-Origin", origin);
+    res.set("Vary", "Origin");
+    res.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+    res.set("Access-Control-Allow-Methods", "POST");
+  }
+  if (req.method === "OPTIONS") { res.status(allowed ? 204 : 403).send(""); return; }
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+
+  // Потребителят се взима от Firebase ID token, не от тялото на заявката
+  const authz = req.get("Authorization") || "";
+  let user;
+  try { user = await admin.auth().verifyIdToken(authz.startsWith("Bearer ") ? authz.slice(7) : ""); }
+  catch (e) { res.status(401).json({ error: "unauthenticated" }); return; }
+
+  try {
+    const stripe = require("stripe")(STRIPE_SECRET_KEY.value());
+    const snap = await admin.firestore().collection("users").doc(user.uid).get();
+    const ud = snap.exists ? snap.data() : {};
+    if (ud.plan === "pro") { res.status(409).json({ error: "already_pro" }); return; }
+
+    const base = APP_URL.value();
+    const sep = base.includes("?") ? "&" : "?";
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      ...(ud.stripeCustomerId ? { customer: ud.stripeCustomerId } : { customer_email: user.email }),
+      line_items: [{ price: STRIPE_PRICE_ID.value(), quantity: 1 }],
+      success_url: `${base}${sep}checkout=success`,
+      cancel_url: `${base}${sep}checkout=cancel`,
+      client_reference_id: user.uid,
+      metadata: { userId: user.uid },
+      subscription_data: { metadata: { userId: user.uid } },
+      allow_promotion_codes: true,
+      locale: "bg",
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("createCheckout:", err);
+    res.status(500).json({ error: "checkout_failed" });
+  }
+});
+
+// Stripe Dashboard → Developers → Webhooks → https://europe-west1-<project>.cloudfunctions.net/stripeWebhook
+// Events: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted
+// Единственото място, което записва plan: 'pro' / 'free' в users/{uid}.
+exports.stripeWebhook = onRequest({ region: REGION, secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] }, async (req, res) => {
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+  const stripe = require("stripe")(STRIPE_SECRET_KEY.value());
+  let evt;
+  try {
+    evt = stripe.webhooks.constructEvent(req.rawBody, req.get("stripe-signature"), STRIPE_WEBHOOK_SECRET.value());
+  } catch (err) {
+    console.error("stripeWebhook signature:", err.message);
+    res.status(400).send("Invalid signature");
+    return;
+  }
+
+  const db = admin.firestore();
+  const setPlan = async (uid, plan, extra = {}) => {
+    if (!uid) { console.warn("stripeWebhook: no uid for", evt.type); return; }
+    await db.collection("users").doc(uid).set({ plan, planUpd: new Date(), ...extra }, { merge: true });
+    console.log(`stripeWebhook: ${uid} → ${plan} (${evt.type})`);
+  };
+  const uidForSubscription = async (sub) => {
+    if (sub.metadata && sub.metadata.userId) return sub.metadata.userId;
+    const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer && sub.customer.id;
+    if (!customerId) return null;
+    const q = await db.collection("users").where("stripeCustomerId", "==", customerId).limit(1).get();
+    return q.empty ? null : q.docs[0].id;
+  };
+
+  try {
+    switch (evt.type) {
+      case "checkout.session.completed": {
+        const s = evt.data.object;
+        const uid = s.client_reference_id || (s.metadata && s.metadata.userId);
+        if (s.mode === "subscription" && s.status === "complete") {
+          await setPlan(uid, "pro", {
+            stripeCustomerId: typeof s.customer === "string" ? s.customer : null,
+            stripeSubscriptionId: typeof s.subscription === "string" ? s.subscription : null,
+            stripeSubscriptionStatus: "active",
+          });
+        }
+        break;
+      }
+      case "customer.subscription.updated": {
+        const sub = evt.data.object;
+        await setPlan(await uidForSubscription(sub), ACTIVE_STATUSES.includes(sub.status) ? "pro" : "free",
+          { stripeSubscriptionId: sub.id, stripeSubscriptionStatus: sub.status });
+        break;
+      }
+      case "customer.subscription.deleted": {
+        await setPlan(await uidForSubscription(evt.data.object), "free", { stripeSubscriptionStatus: "canceled" });
+        break;
+      }
+      default:
+        break;
+    }
+  } catch (err) {
+    console.error("stripeWebhook handler:", err);
+    res.status(500).json({ error: "handler_failed" }); // Stripe ще опита отново
+    return;
+  }
+  res.json({ received: true });
+});

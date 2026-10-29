@@ -417,6 +417,7 @@ html,body{height:100%;background:var(--bg);font-family:'SF Pro Display',-apple-s
 // ══ FIREBASE ══
 const FBCFG={apiKey:"AIzaSyCZ-M2rRZCA6mwcDLV0lxNpGa8gINrnjxE",authDomain:"napomni-abae3.firebaseapp.com",projectId:"napomni-abae3",storageBucket:"napomni-abae3.firebasestorage.app",messagingSenderId:"469508428647",appId:"1:469508428647:web:5b34a7bd7b2956d6a795c2",measurementId:"G-FT3VKM1C36"};
 const ADMINS=["velchevivanov@gmail.com"];
+const CHECKOUT_URL="https://europe-west1-napomni-abae3.cloudfunctions.net/createCheckout";
 const SUPER_ADMINS=["velchevivanov@gmail.com"];
 let db=null,auth=null,fbOK=false;
 try{firebase.initializeApp(FBCFG);db=firebase.firestore();auth=firebase.auth();fbOK=true;}catch(e){console.warn('FB:',e.message);}
@@ -1810,7 +1811,7 @@ async function upgradePro(){
   toast('⏳ Пренасочване към плащане...','#2563EB');
   try{
     const idToken=await CU.getIdToken();
-    const res=await fetch('/.netlify/functions/create-checkout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken}});
+    const res=await fetch(CHECKOUT_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken}});
     const data=await res.json().catch(()=>({}));
     if(res.status===409){await refreshPlan();updatePUI();rHome();rDl();toast('⭐ Вече имате Pro план');return;}
     if(!res.ok||!data.url)throw new Error(data.error||res.status);
@@ -1860,7 +1861,7 @@ async function checkUpdates(){
 
 // ══ PWA ══
 let dp=null,swReg=null;
-const swReady=('serviceWorker' in navigator)?navigator.serviceWorker.register('/service-worker.js').then(r=>swReg=r).catch(e=>{console.warn('SW:',e.message);return null;}):Promise.resolve(null);
+const swReady=('serviceWorker' in navigator)?navigator.serviceWorker.register('service-worker.js').then(r=>swReg=r).catch(e=>{console.warn('SW:',e.message);return null;}):Promise.resolve(null);
 // Чистим стария отделен firebase-messaging-sw.js, ако е бил регистриран
 if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if((r.active||r.installing||r.waiting)?.scriptURL?.endsWith('/firebase-messaging-sw.js'))r.unregister();})).catch(()=>{});
 
